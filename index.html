@@ -3,491 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tort Sifarişi - Web</title>
+    <title>🎂 Online Tort Sifarişi</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .content {
-            display: flex;
-            min-height: 600px;
-        }
-        
-        .sidebar {
-            width: 300px;
-            background: #f8f9fa;
-            padding: 20px;
-            border-right: 1px solid #dee2e6;
-        }
-        
-        .main-content {
-            flex: 1;
-            padding: 30px;
-        }
-        
-        .cake-list {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-        
-        .cake-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .cake-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-color: #667eea;
-        }
-        
-        .cake-item.active {
-            background: #e3f2fd;
-            border-color: #2196f3;
-        }
-        
-        .cake-details {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s;
-            width: 100%;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-        }
-        
-        .cake-image {
-            width: 100%;
-            height: 200px;
-            background: #e9ecef;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .cake-image img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-        }
-        
-        .cake-size-indicator {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: none;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .loader {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
-        
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        /* Sifariş təsdiq bildirişi */
-        .order-confirmation {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            color: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
-            display: none;
-            align-items: center;
-            max-width: 400px;
-            z-index: 1000;
-            animation: slideIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s forwards;
-            transform: translateX(-100px);
-            opacity: 0;
-        }
-        
-        .order-confirmation.show {
-            display: flex;
-            animation: slideIn 0.5s ease-out forwards;
-        }
-        
-        .order-confirmation.hide {
-            animation: slideOut 0.5s ease-in forwards;
-        }
-        
-        .confirmation-icon {
-            font-size: 28px;
-            margin-right: 15px;
-            animation: bounce 1s infinite alternate;
-        }
-        
-        .confirmation-content h4 {
-            margin: 0 0 5px 0;
-            font-size: 18px;
-        }
-        
-        .confirmation-content p {
-            margin: 0;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        /* Çəki slideri üçün */
-        .weight-slider-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .weight-slider {
-            flex: 1;
-            height: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
-            outline: none;
-        }
-        
-        .weight-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: 3px solid white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .weight-value {
-            margin-left: 15px;
-            font-weight: 600;
-            color: #667eea;
-            min-width: 40px;
-            text-align: center;
-        }
-        
-        .weight-options {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-        }
-        
-        .weight-option {
-            padding: 5px 10px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .weight-option:hover {
-            background: #e9ecef;
-        }
-        
-        .weight-option.active {
-            background: #667eea;
-            color: white;
-        }
-        
-        /* Şəkil yüklənmə animasiyası */
-        .image-loading {
-            opacity: 0.5;
-            filter: blur(2px);
-        }
-        
-        .image-loaded {
-            opacity: 1;
-            filter: blur(0);
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(-100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(-100px);
-                opacity: 0;
-            }
-        }
-        
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-        
-        @keyframes bounce {
-            from {
-                transform: translateY(0);
-            }
-            to {
-                transform: translateY(-5px);
-            }
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @media (max-width: 768px) {
-            .content {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #dee2e6;
-            }
-            
-            .order-confirmation {
-                left: 10px;
-                right: 10px;
-                max-width: calc(100% - 20px);
-            }
-            
-            .weight-options {
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-            
-            .weight-option {
-                flex: 1;
-                min-width: 45%;
-                text-align: center;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .content { display: flex; min-height: 600px; }
+        .sidebar { width: 300px; background: #f8f9fa; padding: 20px; border-right: 1px solid #dee2e6; }
+        .main-content { flex: 1; padding: 30px; }
+        .cake-list { max-height: 400px; overflow-y: auto; margin-bottom: 20px; }
+        .cake-item { padding: 15px; margin: 10px 0; background: white; border-radius: 8px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+        .cake-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: #667eea; }
+        .cake-item.active { background: #e3f2fd; border-color: #2196f3; }
+        .cake-details { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #495057; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 16px; }
+        input:focus, textarea:focus { outline: none; border-color: #667eea; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; }
+        button:hover { transform: translateY(-2px); }
+        .cake-image { width: 100%; height: 200px; background: #e9ecef; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden; }
+        .cake-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .cake-size-indicator { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 20px; font-size: 14px; }
+        .order-confirmation { position: fixed; bottom: 20px; left: 20px; background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; padding: 20px 25px; border-radius: 12px; box-shadow: 0 8px 25px rgba(76,175,80,0.3); display: none; align-items: center; max-width: 400px; z-index: 1000; }
+        .order-confirmation.show { display: flex; animation: slideIn 0.5s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateX(-100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100px); opacity: 0; } }
+        .confirmation-icon { font-size: 28px; margin-right: 15px; }
+        @media (max-width: 768px) { .content { flex-direction: column; } .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #dee2e6; } }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Sifariş təsdiq bildirişi -->
     <div class="order-confirmation" id="orderConfirmation">
-        <div class="confirmation-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="confirmation-content">
-            <h4>Sifarişiniz Təsdiqləndi!</h4>
-            <p id="confirmationDetails">Sifariş nömrəniz: <span id="orderNumber">-</span></p>
-        </div>
+        <div class="confirmation-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="confirmation-content"><h4>Sifarişiniz Təsdiqləndi!</h4><p id="confirmationDetails">Sifariş nömrəniz: <span id="orderNumber">-</span></p></div>
     </div>
     
     <div class="container">
-        <header>
-            <h1>🎂 Online Tort Sifarişi</h1>
-            <p>Sevdiyiniz tortu seçin, sifariş edin</p>
-        </header>
-        
+        <header><h1>🎂 Online Tort Sifarişi</h1><p>Sevdiyiniz tortu seçin, sifariş edin</p></header>
         <div class="content">
-            <div class="sidebar">
-                <h3>Tort Seçimi</h3>
-                <div class="cake-list" id="cakeList">
-                    <!-- Tortlar buraya yüklənəcək -->
-                </div>
-            </div>
-            
+            <div class="sidebar"><h3>Tort Seçimi</h3><div class="cake-list" id="cakeList"></div></div>
             <div class="main-content">
-                <div class="message" id="message"></div>
-                
-                <div class="loader" id="loader">
-                    <div class="spinner"></div>
-                    <p>Yüklənir...</p>
-                </div>
-                
                 <div id="cakeDetails" style="display: none;">
-                    <div class="cake-image">
-                        <img id="cakeImage" src="" alt="Tort şəkli" class="image-loaded">
-                        <div class="cake-size-indicator" id="sizeIndicator">1.0 kg</div>
-                    </div>
-                    
-                    <div class="cake-details">
-                        <h2 id="cakeName"></h2>
-                        <p id="cakePrepTime"></p>
-                        <p><strong>Qiymət:</strong> <span id="cakePrice"></span> AZN</p>
-                    </div>
-                    
+                    <div class="cake-image"><img id="cakeImage" src="" alt="Tort şəkli"><div class="cake-size-indicator" id="sizeIndicator">1.0 kg</div></div>
+                    <div class="cake-details"><h2 id="cakeName"></h2><p id="cakePrepTime"></p><p><strong>Qiymət:</strong> <span id="cakePrice"></span> AZN</p></div>
                     <h3>Sifariş Məlumatları</h3>
-                    
                     <div class="form-group">
-                        <label for="weight">Çəki (kg):</label>
-                        <div class="weight-slider-container">
-                            <input type="range" class="weight-slider" id="weightSlider" min="0.5" max="5" step="0.1" value="1.0">
-                            <span class="weight-value" id="weightValue">1.0 kg</span>
+                        <label>Çəki (kg):</label>
+                        <div style="display:flex;align-items:center;margin-bottom:10px;">
+                            <input type="range" id="weightSlider" min="0.5" max="5" step="0.1" value="1.0" style="flex:1;height:8px;">
+                            <span id="weightValue" style="margin-left:15px;font-weight:600;color:#667eea;min-width:40px;">1.0 kg</span>
                         </div>
-                        <input type="number" id="weight" step="0.1" min="0.5" max="10" value="1.0" style="display: none;">
-                        
-                        <div class="weight-options">
+                        <div style="display:flex;justify-content:space-between;margin-top:5px;">
                             <div class="weight-option" data-weight="0.5">Kiçik (0.5 kg)</div>
                             <div class="weight-option active" data-weight="1.0">Orta (1.0 kg)</div>
                             <div class="weight-option" data-weight="2.0">Böyük (2.0 kg)</div>
                             <div class="weight-option" data-weight="3.0">Nəhəng (3.0 kg)</div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="personCount">Nəfər Sayı:</label>
-                        <input type="number" id="personCount" min="1" max="50" value="5">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="customerName">Adınız:</label>
-                        <input type="text" id="customerName" placeholder="Adınızı daxil edin">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="customerPhone">Telefon:</label>
-                        <input type="tel" id="customerPhone" placeholder="+994501234567">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="deliveryDate">Çatdırılma Tarixi:</label>
-                        <input type="date" id="deliveryDate">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="orderDescription">Xüsusi İstəklər (Əlavə):</label>
-                        <textarea id="orderDescription" rows="3" placeholder="Tortun üzərində yazılacaq yazı və ya xüsusi istəklər..."></textarea>
-                    </div>
-                    
+                    <div class="form-group"><label>Nəfər Sayı:</label><input type="number" id="personCount" min="1" max="50" value="5"></div>
+                    <div class="form-group"><label>Adınız:</label><input type="text" id="customerName" placeholder="Adınızı daxil edin"></div>
+                    <div class="form-group"><label>Telefon:</label><input type="tel" id="customerPhone" placeholder="+994501234567"></div>
+                    <div class="form-group"><label>Çatdırılma Tarixi:</label><input type="date" id="deliveryDate"></div>
+                    <div class="form-group"><label>Xüsusi İstəklər:</label><textarea id="orderDescription" rows="3" placeholder="Tortun üzərində yazılacaq yazı..."></textarea></div>
                     <button onclick="placeOrder()">Sifarişi Təsdiqlə</button>
                 </div>
             </div>
@@ -495,419 +76,248 @@
     </div>
 
     <script>
-        const API_URL = '';
+        // TEST MƏLUMATLARI - API YOXDUR, HAMISI BURADADIR
+        const cakesData = {
+            "Quş Südü Tortu": { 
+                prep_time: "120 daq", 
+                base_price: 25,
+                images: {
+                    '0.5': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
+                    '1.0': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop',
+                    '2.0': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=350&fit=crop',
+                    '3.0': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=400&fit=crop'
+                }
+            },
+            "Şokoladlı Tort": { 
+                prep_time: "90 daq", 
+                base_price: 30,
+                images: {
+                    '0.5': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=300&h=200&fit=crop',
+                    '1.0': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&h=300&fit=crop',
+                    '2.0': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&h=350&fit=crop',
+                    '3.0': 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&h=400&fit=crop'
+                }
+            },
+            "Qaymaqlı Tort": { 
+                prep_time: "150 daq", 
+                base_price: 28,
+                images: {
+                    '0.5': 'https://images.unsplash.com/photo-1559620192-532c7c3fa7d0?w=300&h=200&fit=crop',
+                    '1.0': 'https://images.unsplash.com/photo-1559620192-532c7c3fa7d0?w=400&h=300&fit=crop',
+                    '2.0': 'https://images.unsplash.com/photo-1559620192-532c7c3fa7d0?w=500&h=350&fit=crop',
+                    '3.0': 'https://images.unsplash.com/photo-1559620192-532c7c3fa7d0?w=600&h=400&fit=crop'
+                }
+            },
+            "Meyvəli Tort": { 
+                prep_time: "100 daq", 
+                base_price: 32,
+                images: {
+                    '0.5': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300&h=200&fit=crop',
+                    '1.0': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop',
+                    '2.0': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=350&fit=crop',
+                    '3.0': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=400&fit=crop'
+                }
+            }
+        };
+
         let selectedCake = null;
-        let currentPrice = 0;
         let currentCakeData = null;
         let currentWeight = 1.0;
         
-        // Səhifə yüklənəndə
+        // SƏHİFƏ YÜKLƏNƏNDƏ
         window.onload = function() {
             loadCakes();
-            
-            // Tarixi bugünkü tarixə təyin et
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('deliveryDate').value = today;
             document.getElementById('deliveryDate').min = today;
             
-            // Çəki sliderini dinlə
-            const weightSlider = document.getElementById('weightSlider');
-            const weightInput = document.getElementById('weight');
-            const weightValue = document.getElementById('weightValue');
-            
-            weightSlider.addEventListener('input', function() {
+            // Çəki slideri
+            document.getElementById('weightSlider').addEventListener('input', function() {
                 currentWeight = parseFloat(this.value);
-                weightInput.value = currentWeight;
-                weightValue.textContent = currentWeight.toFixed(1) + ' kg';
-                updateSizeIndicator();
-                loadCakeImageForWeight();
+                document.getElementById('weightValue').textContent = currentWeight.toFixed(1) + ' kg';
+                updateCakeImage();
                 calculatePrice();
                 updatePersonCount();
+                updateActiveWeightOption();
             });
             
-            // Çəki inputunu dinlə
-            weightInput.addEventListener('input', function() {
-                currentWeight = parseFloat(this.value) || 1.0;
-                weightSlider.value = currentWeight;
-                weightValue.textContent = currentWeight.toFixed(1) + ' kg';
-                updateSizeIndicator();
-                loadCakeImageForWeight();
-                calculatePrice();
-                updatePersonCount();
-            });
-            
-            // Çəki seçim düymələrini dinlə
+            // Çəki seçim düymələri
             document.querySelectorAll('.weight-option').forEach(option => {
                 option.addEventListener('click', function() {
-                    const weight = parseFloat(this.getAttribute('data-weight'));
-                    currentWeight = weight;
-                    weightSlider.value = weight;
-                    weightInput.value = weight;
-                    weightValue.textContent = weight.toFixed(1) + ' kg';
-                    
-                    // Aktiv seçimi güncəllə
-                    document.querySelectorAll('.weight-option').forEach(opt => {
-                        opt.classList.remove('active');
-                    });
+                    currentWeight = parseFloat(this.getAttribute('data-weight'));
+                    document.getElementById('weightSlider').value = currentWeight;
+                    document.getElementById('weightValue').textContent = currentWeight.toFixed(1) + ' kg';
+                    document.querySelectorAll('.weight-option').forEach(opt => opt.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    updateSizeIndicator();
-                    loadCakeImageForWeight();
+                    updateCakeImage();
                     calculatePrice();
                     updatePersonCount();
                 });
             });
             
-            // Nəfər sayı dəyişəndə çəkini hesabla
+            // Nəfər sayı
             document.getElementById('personCount').addEventListener('input', function() {
                 const personCount = parseInt(this.value) || 5;
                 currentWeight = (personCount * 0.2).toFixed(1);
-                weightSlider.value = currentWeight;
-                weightInput.value = currentWeight;
-                weightValue.textContent = currentWeight + ' kg';
-                
-                // Aktiv çəki seçimini güncəllə
-                updateActiveWeightOption(currentWeight);
-                
-                updateSizeIndicator();
-                loadCakeImageForWeight();
+                document.getElementById('weightSlider').value = currentWeight;
+                document.getElementById('weightValue').textContent = currentWeight + ' kg';
+                updateActiveWeightOption();
+                updateCakeImage();
                 calculatePrice();
             });
         };
-        
-        function updateActiveWeightOption(weight) {
+
+        function updateActiveWeightOption() {
             document.querySelectorAll('.weight-option').forEach(opt => {
                 const optWeight = parseFloat(opt.getAttribute('data-weight'));
                 opt.classList.remove('active');
-                
-                // Ən yaxın seçimi aktiv et
-                if (Math.abs(optWeight - weight) < 0.3) {
+                if (Math.abs(optWeight - currentWeight) < 0.3) {
                     opt.classList.add('active');
                 }
             });
         }
-        
-        function showLoader() {
-            document.getElementById('loader').style.display = 'block';
-        }
-        
-        function hideLoader() {
-            document.getElementById('loader').style.display = 'none';
-        }
-        
-        function showMessage(text, type = 'success') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Çəkiyə görə ölçü göstəricisini yenilə
+
         function updateSizeIndicator() {
-            const sizeIndicator = document.getElementById('sizeIndicator');
-            
-            if (sizeIndicator) {
-                sizeIndicator.textContent = currentWeight.toFixed(1) + ' kg';
-                
-                // Ölçüyə görə rəng dəyişdir
-                if (currentWeight < 1.0) {
-                    sizeIndicator.style.background = 'rgba(102, 126, 234, 0.8)'; // Kiçik - Mavi
-                } else if (currentWeight < 2.0) {
-                    sizeIndicator.style.background = 'rgba(118, 75, 162, 0.8)'; // Orta - Bənövşəyi
-                } else if (currentWeight < 3.0) {
-                    sizeIndicator.style.background = 'rgba(255, 152, 0, 0.8)'; // Böyük - Narıncı
-                } else {
-                    sizeIndicator.style.background = 'rgba(244, 67, 54, 0.8)'; // Nəhəng - Qırmızı
-                }
+            const indicator = document.getElementById('sizeIndicator');
+            if (indicator) {
+                indicator.textContent = currentWeight.toFixed(1) + ' kg';
+                if (currentWeight < 1.0) indicator.style.background = 'rgba(102, 126, 234, 0.8)';
+                else if (currentWeight < 2.0) indicator.style.background = 'rgba(118, 75, 162, 0.8)';
+                else if (currentWeight < 3.0) indicator.style.background = 'rgba(255, 152, 0, 0.8)';
+                else indicator.style.background = 'rgba(244, 67, 54, 0.8)';
             }
         }
-        
+
         function updatePersonCount() {
-            const personCount = Math.round(currentWeight / 0.2);
-            document.getElementById('personCount').value = personCount;
+            document.getElementById('personCount').value = Math.round(currentWeight / 0.2);
         }
-        
-        // Çəkiyə görə uyğun şəkil yüklə
-        async function loadCakeImageForWeight() {
+
+        // TORT ŞƏKİLİNİ YENİLƏ
+        function updateCakeImage() {
             if (!currentCakeData || !selectedCake) return;
-            
             const cakeImage = document.getElementById('cakeImage');
-            let imageUrl = '';
             
-            // Şəkli yüklənmə moduna keçir
-            cakeImage.classList.remove('image-loaded');
-            cakeImage.classList.add('image-loading');
-            
-            try {
-                // API-dən çəkiyə uyğun şəkli al
-                const response = await fetch(`${API_URL}/api/cakes/${selectedCake}/image?weight=${currentWeight}`);
-                const data = await response.json();
-                
-                if (data.success && data.image_url) {
-                    imageUrl = `${API_URL}${data.image_url}`;
-                } else if (currentCakeData.images) {
-                    // Ən yaxın çəki şəklini tap
-                    const weights = Object.keys(currentCakeData.images)
-                        .map(w => parseFloat(w))
-                        .sort((a, b) => a - b);
-                    
-                    // Ən yaxın çəkini tap
-                    let closestWeight = weights[0];
-                    for (const weight of weights) {
-                        if (Math.abs(weight - currentWeight) < Math.abs(closestWeight - currentWeight)) {
-                            closestWeight = weight;
-                        }
-                    }
-                    
-                    // Ən yaxın şəkli göstər
-                    const closestWeightKey = closestWeight.toFixed(1);
-                    if (currentCakeData.images[closestWeightKey]) {
-                        imageUrl = `${API_URL}${currentCakeData.images[closestWeightKey].url}`;
-                    } else if (currentCakeData.images['0.0']) {
-                        imageUrl = `${API_URL}${currentCakeData.images['0.0'].url}`;
-                    }
+            // Ən yaxın çəkini tap
+            const weights = Object.keys(currentCakeData.images).map(w => parseFloat(w)).sort((a,b) => a-b);
+            let closestWeight = weights[0];
+            for (const weight of weights) {
+                if (Math.abs(weight - currentWeight) < Math.abs(closestWeight - currentWeight)) {
+                    closestWeight = weight;
                 }
-                
-                if (imageUrl) {
-                    // Şəkli yüklə
-                    const img = new Image();
-                    img.onload = function() {
-                        cakeImage.src = imageUrl;
-                        cakeImage.alt = `${selectedCake} tortu (${currentWeight} kg)`;
-                        cakeImage.classList.remove('image-loading');
-                        cakeImage.classList.add('image-loaded');
-                    };
-                    img.onerror = function() {
-                        cakeImage.src = '';
-                        cakeImage.alt = 'Şəkil yüklənə bilmədi';
-                        cakeImage.classList.remove('image-loading');
-                        cakeImage.classList.add('image-loaded');
-                    };
-                    img.src = imageUrl;
-                } else {
-                    cakeImage.src = '';
-                    cakeImage.alt = 'Şəkil yoxdur';
-                    cakeImage.classList.remove('image-loading');
-                    cakeImage.classList.add('image-loaded');
-                }
-            } catch (error) {
-                console.error('Şəkil yüklənərkən xəta:', error);
-                cakeImage.src = '';
-                cakeImage.alt = 'Şəkil yüklənə bilmədi';
-                cakeImage.classList.remove('image-loading');
-                cakeImage.classList.add('image-loaded');
             }
+            
+            // Şəkli dəyiş
+            cakeImage.src = currentCakeData.images[closestWeight.toFixed(1)];
+            cakeImage.alt = `${selectedCake} (${currentWeight} kg)`;
+            updateSizeIndicator();
         }
-        
-        // Sifariş təsdiq bildirişini göstər
-        function showOrderConfirmation(orderId, cakeName) {
+
+        // TORTLARI YÜKLƏ
+        function loadCakes() {
+            const cakeList = document.getElementById('cakeList');
+            cakeList.innerHTML = '';
+            
+            Object.keys(cakesData).forEach(cakeName => {
+                const cakeDiv = document.createElement('div');
+                cakeDiv.className = 'cake-item';
+                cakeDiv.innerHTML = `<h4>${cakeName}</h4><p>${cakesData[cakeName].prep_time}</p>`;
+                cakeDiv.onclick = () => selectCake(cakeName, cakesData[cakeName]);
+                cakeList.appendChild(cakeDiv);
+            });
+            
+            // İlk tortu seç
+            const firstCake = Object.keys(cakesData)[0];
+            if (firstCake) selectCake(firstCake, cakesData[firstCake]);
+        }
+
+        // TORT SEÇ
+        function selectCake(cakeName, cakeData) {
+            selectedCake = cakeName;
+            currentCakeData = cakeData;
+            
+            document.querySelectorAll('.cake-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.getElementById('cakeName').textContent = cakeName;
+            document.getElementById('cakePrepTime').textContent = `Hazırlıq vaxtı: ${cakeData.prep_time}`;
+            document.getElementById('cakeDetails').style.display = 'block';
+            
+            updateCakeImage();
+            calculatePrice();
+        }
+
+        // QİYMƏT HESABLA
+        function calculatePrice() {
+            if (!selectedCake || !currentCakeData) return;
+            const price = currentCakeData.base_price + (15 * currentWeight);
+            document.getElementById('cakePrice').textContent = price.toFixed(2);
+        }
+
+        // SİFARİŞ TƏSDİQ BİLDİRİŞİ
+        function showOrderConfirmation() {
+            const orderId = 'ORD' + Math.floor(Math.random() * 10000);
+            document.getElementById('orderNumber').textContent = orderId;
             const confirmationDiv = document.getElementById('orderConfirmation');
-            const orderNumberSpan = document.getElementById('orderNumber');
-            
-            // Sifariş nömrəsini təyin et
-            orderNumberSpan.textContent = orderId || '#' + Math.floor(Math.random() * 10000);
-            
-            // Bildiriş məzmununu yenilə
-            document.getElementById('confirmationDetails').innerHTML = 
-                `Sifariş nömrəniz: <span id="orderNumber">${orderNumberSpan.textContent}</span>`;
-            
-            // Bildirişi göstər
             confirmationDiv.classList.remove('hide');
             confirmationDiv.classList.add('show');
             
-            // 5 saniyədən sonra bildirişi gizlət
             setTimeout(() => {
                 confirmationDiv.classList.remove('show');
                 confirmationDiv.classList.add('hide');
-                
-                // Animasiya bitdikdən sonra tam gizlət
                 setTimeout(() => {
                     confirmationDiv.classList.remove('hide');
                     confirmationDiv.style.display = 'none';
                 }, 500);
             }, 5000);
         }
-        
-        async function loadCakes() {
-            showLoader();
-            try {
-                const response = await fetch(`${API_URL}/api/cakes`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const cakeList = document.getElementById('cakeList');
-                    cakeList.innerHTML = '';
-                    
-                    Object.keys(data.cakes).forEach(cakeName => {
-                        const cakeDiv = document.createElement('div');
-                        cakeDiv.className = 'cake-item';
-                        cakeDiv.innerHTML = `
-                            <h4>${cakeName}</h4>
-                            <p>${data.cakes[cakeName].prep_time || ''}</p>
-                        `;
-                        
-                        cakeDiv.onclick = () => selectCake(cakeName, data.cakes[cakeName]);
-                        
-                        cakeList.appendChild(cakeDiv);
-                    });
-                    
-                    // İlk tortu seç
-                    const firstCake = Object.keys(data.cakes)[0];
-                    if (firstCake) {
-                        selectCake(firstCake, data.cakes[firstCake]);
-                    }
-                }
-            } catch (error) {
-                console.error('Xəta:', error);
-                showMessage('Tortlar yüklənərkən xəta baş verdi', 'error');
-            } finally {
-                hideLoader();
-            }
-        }
-        
-        async function selectCake(cakeName, cakeData) {
-            selectedCake = cakeName;
-            currentCakeData = cakeData;
-            
-            // Aktiv tortu göstər
-            document.querySelectorAll('.cake-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            event.currentTarget.classList.add('active');
-            
-            // Tort detallarını göstər
-            document.getElementById('cakeName').textContent = cakeName;
-            document.getElementById('cakePrepTime').textContent = `Hazırlıq vaxtı: ${cakeData.prep_time || 'Məlumat yoxdur'}`;
-            
-            // Çəkiyə uyğun şəkli yüklə
-            loadCakeImageForWeight();
-            
-            // Qiyməti hesabla
-            calculatePrice();
-            
-            // Tort detallarını göstər
-            document.getElementById('cakeDetails').style.display = 'block';
-            
-            // Ölçü göstəricisini yenilə
-            updateSizeIndicator();
-        }
-        
-        async function calculatePrice() {
-            if (!selectedCake) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/cakes/${selectedCake}/price?weight=${currentWeight}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentPrice = data.price;
-                    document.getElementById('cakePrice').textContent = currentPrice.toFixed(2);
-                } else {
-                    // API cavab vermirsə, sadə hesablama ilə
-                    const basePrice = 20;
-                    const pricePerKg = 15;
-                    currentPrice = basePrice + (pricePerKg * currentWeight);
-                    document.getElementById('cakePrice').textContent = currentPrice.toFixed(2);
-                }
-            } catch (error) {
-                console.error('Qiymət hesablanarkən xəta:', error);
-                // Offline rejim üçün sadə hesablama
-                const basePrice = 20;
-                const pricePerKg = 15;
-                currentPrice = basePrice + (pricePerKg * currentWeight);
-                document.getElementById('cakePrice').textContent = currentPrice.toFixed(2);
-            }
-        }
-        
-        async function placeOrder() {
+
+        // SİFARİŞ VER
+        function placeOrder() {
             if (!selectedCake) {
-                showMessage('Zəhmət olmasa tort seçin', 'error');
+                alert('Zəhmət olmasa tort seçin');
                 return;
             }
             
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const deliveryDate = document.getElementById('deliveryDate').value;
+            
+            if (!customerName || !customerPhone || !deliveryDate) {
+                alert('Zəhmət olmasa bütün məlumatları doldurun');
+                return;
+            }
+            
+            // Sifariş məlumatları
             const orderData = {
-                cake_name: selectedCake,
+                cake: selectedCake,
                 weight: currentWeight,
-                customer_name: document.getElementById('customerName').value.trim(),
-                customer_phone: document.getElementById('customerPhone').value.trim(),
-                delivery_date: document.getElementById('deliveryDate').value,
-                order_description: document.getElementById('orderDescription').value.trim(),
-                person_count: parseInt(document.getElementById('personCount').value)
+                price: document.getElementById('cakePrice').textContent,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                deliveryDate: deliveryDate,
+                description: document.getElementById('orderDescription').value.trim()
             };
             
-            // Validasiya
-            if (!orderData.customer_name) {
-                showMessage('Adınızı daxil edin', 'error');
-                return;
-            }
+            console.log('Sifariş verildi:', orderData);
             
-            if (!orderData.customer_phone) {
-                showMessage('Telefon nömrənizi daxil edin', 'error');
-                return;
-            }
+            // Formu təmizlə
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('orderDescription').value = '';
             
-            if (!orderData.delivery_date) {
-                showMessage('Çatdırılma tarixini seçin', 'error');
-                return;
-            }
+            // Çəkini sıfırla
+            currentWeight = 1.0;
+            document.getElementById('weightSlider').value = 1.0;
+            document.getElementById('weightValue').textContent = '1.0 kg';
+            document.getElementById('personCount').value = 5;
+            document.querySelectorAll('.weight-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.getAttribute('data-weight') === '1.0') opt.classList.add('active');
+            });
             
-            showLoader();
-            
-            try {
-                const response = await fetch(`${API_URL}/api/orders`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Üst hissədə mesaj göstər
-                    showMessage(`✅ Sifariş uğurla yaradıldı! Sifariş ID: ${result.order_id}`, 'success');
-                    
-                    // Sol aşağıda bildiriş göstər
-                    showOrderConfirmation(result.order_id, selectedCake);
-                    
-                    // Formu təmizlə
-                    document.getElementById('customerName').value = '';
-                    document.getElementById('customerPhone').value = '';
-                    document.getElementById('orderDescription').value = '';
-                    
-                    // Çəkini sıfırla
-                    currentWeight = 1.0;
-                    document.getElementById('weightSlider').value = 1.0;
-                    document.getElementById('weight').value = 1.0;
-                    document.getElementById('weightValue').textContent = '1.0 kg';
-                    document.getElementById('personCount').value = 5;
-                    
-                    // Aktiv çəki seçimini yenilə
-                    document.querySelectorAll('.weight-option').forEach(opt => {
-                        opt.classList.remove('active');
-                        if (opt.getAttribute('data-weight') === '1.0') {
-                            opt.classList.add('active');
-                        }
-                    });
-                    
-                    // Şəkili və ölçü göstəricisini yenilə
-                    loadCakeImageForWeight();
-                    updateSizeIndicator();
-                } else {
-                    showMessage(`❌ Xəta: ${result.error}`, 'error');
-                }
-            } catch (error) {
-                console.error('Sifariş xətası:', error);
-                showMessage('Sifariş zamanı xəta baş verdi', 'error');
-            } finally {
-                hideLoader();
-            }
+            // Bildiriş göstər
+            showOrderConfirmation();
+            updateCakeImage();
         }
     </script>
 </body>
