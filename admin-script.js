@@ -1,34 +1,94 @@
-// admin-script.js - Local Storage əsasında tam funksional versiya
+// admin-script.js - GitHub JSON və Local Storage ilə tam funksional versiya (ASYNC)
+
 const DATA_KEY = 'tortSifarisiAdminData';
 let appData;
 const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/AzizovFarid/tort-sifarisi/main/cake_images_v17/';
+const JSON_BASE_URL = 'https://raw.githubusercontent.com/AzizovFarid/tort-sifarisi/main/data/';
 
-// İlkin Məlumatlar (Əgər Local Storage boşdursa)
-const DEFAULT_DATA = {
-    config: { markupPercent: 50 },
-    inventory: [
-        { id: 101, name: "Yumurta", unit: "ədəd", stock: 150, min_level: 50, price: 0.20 },
-        { id: 102, name: "Un", unit: "kq", stock: 12, min_level: 5, price: 1.50 },
-        { id: 103, name: "Kakao", unit: "kq", stock: 2, min_level: 3, price: 8.00 },
-        { id: 104, name: "Şəkər", unit: "kq", stock: 50, min_level: 20, price: 1.20 }
-    ],
-    recipes: [
-        { id: 1, name: "Quru Südlü Tortu", time: "120 dəq", image_file: "tort_1.png", ingredients: [{ name: "Un", amount: 0.5, unit: "kq" }, { name: "Yumurta", amount: 6, unit: "ədəd" }, { name: "Şəkər", amount: 0.3, unit: "kq" }] },
-        { id: 2, name: "Qırmızı Məxmər", time: "180 dəq", image_file: "tort_2.png", ingredients: [{ name: "Un", amount: 0.8, unit: "kq" }, { name: "Yumurta", amount: 8, unit: "ədəd" }, { name: "Kakao", amount: 0.1, unit: "kq" }] },
-    ],
-    orders: [
-        { id: 1, customer: "Əli Quliyev", cake: "Quru Südlü Tortu", weight: 1.5, price: 45.00, date: "2025-12-15", status: "Yeni" },
-        { id: 2, customer: "Aynur Məmmədova", cake: "Qırmızı Məxmər", weight: 2.0, price: 60.00, date: "2025-12-14", status: "Hazırlanır" },
-    ],
+const JSON_URLS = {
+    recipes: JSON_BASE_URL + 'recipes_v17.json',
+    orders: JSON_BASE_URL + 'orders_v19.json',
+    config: JSON_BASE_URL + 'config_v19.json',
+    inventory: JSON_BASE_URL + 'inventory_v1.json',
 };
 
-// --- Helper Funksiyalar (Ortax Funksional Məntiq) ---
-function initializeData() {
+// --- Helper Funksiyalar ---
+
+/**
+ * GitHub-dan ilkin məlumatları çəkir və JS-ə uyğun array formatına çevirir.
+ */
+async function fetchGitHubData() {
+    try {
+        const [recipesRes, ordersRes, configRes, inventoryRes] = await Promise.all([
+            fetch(JSON_URLS.recipes),
+            fetch(JSON_URLS.orders),
+            fetch(JSON_URLS.config),
+            fetch(JSON_URLS.inventory)
+        ]);
+
+        const recipesData = await recipesRes.json();
+        const ordersData = await ordersRes.json();
+        const configData = await configRes.json();
+        const inventoryData = await inventoryRes.json();
+        
+        // Python-dakı obyekt/dictionary strukturlarını JS array formatına çeviririk
+        
+        const recipesArray = Object.keys(recipesData).map((key, index) => ({
+            id: index + 1, // Reseptləri ID ilə işləmək üçün
+            name: key,
+            time: recipesData[key].prep_time || "N/A",
+            image_file: recipesData[key].images.default || "no_image.png",
+            ingredients: Object.keys(recipesData[key].ingredients).map(ingKey => ({
+                name: ingKey,
+                amount: recipesData[key].ingredients[ingKey].amount,
+                unit: recipesData[key].ingredients[ingKey].unit || "ədəd"
+            }))
+        }));
+
+        // Inventory Data
+        const inventoryArray = Object.keys(inventoryData).map((key, index) => ({
+            id: index + 100, // Anbar ID-ləri
+            name: key,
+            ...inventoryData[key] // unit, price, stock, min_level
+        }));
+
+
+        return {
+            config: { markupPercent: configData.markup_percent || 50 },
+            inventory: inventoryArray,
+            recipes: recipesArray,
+            orders: ordersData 
+        };
+
+    } catch (error) {
+        console.error("GitHub-dan məlumat çəkilərkən xəta baş verdi.", error);
+        return null;
+    }
+}
+
+
+/**
+ * Məlumatları Local Storage-dan və ya GitHub-dan yükləyir.
+ */
+async function initializeData() {
     const storedData = localStorage.getItem(DATA_KEY);
-    appData = storedData ? JSON.parse(storedData) : DEFAULT_DATA;
-    if (!storedData) saveData();
+    const alertElement = document.getElementById('recipesAlert');
     
-    // Qiymət inputunu doldur
+    if (storedData) {
+        appData = JSON.parse(storedData);
+        alertElement.innerHTML = `<i class="fas fa-info-circle"></i> Local Storage-dan yükləndi. Dəyişikliklər yalnız sizin brauzerinizdə saxlanılır.`;
+    } else {
+        const githubData = await fetchGitHubData();
+        if (githubData) {
+            appData = githubData;
+            saveData(); 
+            alertElement.innerHTML = `<i class="fas fa-info-circle"></i> GitHub JSON-dan ilkin məlumat yükləndi.`;
+        } else {
+            alertElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> XƏTA: İlkin məlumat bazası yüklənə bilmədi!`;
+            return; 
+        }
+    }
+    
     document.getElementById('markupPercent').value = appData.config.markupPercent;
     calculateAllCakePrices();
 }
@@ -37,15 +97,22 @@ function saveData() {
     localStorage.setItem(DATA_KEY, JSON.stringify(appData));
 }
 
-// Python-dakı calculate_cost funksiyasını simulyasiya edir
+/**
+ * Python-dakı calculate_cost funksiyasını simulyasiya edir.
+ */
 function calculateCost(recipe) {
     let totalCost = 0;
     const markup = appData.config.markupPercent / 100;
 
+    const inventoryMap = appData.inventory.reduce((acc, item) => {
+        acc[item.name] = item.price;
+        return acc;
+    }, {});
+
     recipe.ingredients.forEach(ing => {
-        const item = appData.inventory.find(i => i.name === ing.name);
-        if (item) {
-            totalCost += ing.amount * item.price;
+        const price = inventoryMap[ing.name];
+        if (price !== undefined) {
+            totalCost += ing.amount * price;
         }
     });
 
@@ -54,6 +121,7 @@ function calculateCost(recipe) {
 }
 
 function calculateAllCakePrices() {
+    if (!appData || !appData.recipes) return;
     appData.recipes.forEach(recipe => {
         const { base_cost, sale_price } = calculateCost(recipe);
         recipe.base_cost = base_cost;
@@ -62,7 +130,7 @@ function calculateAllCakePrices() {
     saveData();
 }
 
-// --- A. Məlumatları Yükləyən Funksiyalar ---
+// --- A. Məlumatları Yükləyən Funksiyalar (LOAD) ---
 
 function loadRecipes() {
     calculateAllCakePrices();
@@ -77,9 +145,10 @@ function loadRecipes() {
             <td>${recipe.name}</td>
             <td>${recipe.time}</td>
             <td title="${ingredientsText}">${ingredientsText.substring(0, 40)}...</td>
+            <td>${recipe.sale_price.toFixed(2)} AZN (M.D.: ${recipe.base_cost.toFixed(2)} AZN)</td>
             <td>
-                <button class="btn btn-primary btn-sm" onclick="editRecipe(${recipe.id})"><i class="fas fa-edit"></i> Redaktə</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecipe(${recipe.id})"><i class="fas fa-trash-alt"></i> Sil</button>
+                <button class="btn btn-primary btn-sm" onclick="editRecipe('${recipe.name}')"><i class="fas fa-edit"></i> Redaktə</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteRecipe('${recipe.name}')"><i class="fas fa-trash-alt"></i> Sil</button>
             </td>
         `;
     });
@@ -131,12 +200,12 @@ function loadInventory() {
             <td>${item.min_level}</td>
             <td>${item.price.toFixed(2)} AZN</td>
             <td>
-                <button class="btn btn-primary btn-sm" onclick="editInventoryItem(${item.id})"><i class="fas fa-edit"></i> Redaktə</button>
+                <button class="btn btn-primary btn-sm" onclick="editInventoryItem('${item.name}')"><i class="fas fa-edit"></i> Redaktə</button>
             </td>
         `;
     });
     
-    // Anbar Xəbərdarlıqları (get_low_inventory)
+    // Anbar Xəbərdarlıqları (get_low_inventory funksionallığı)
     const lowStockItems = appData.inventory.filter(item => item.stock < item.min_level).map(item => item.name);
     const alertElement = document.getElementById('inventoryAlert');
     
@@ -145,7 +214,7 @@ function loadInventory() {
         alertElement.className = 'alert alert-warning';
     } else {
         alertElement.innerHTML = `<i class="fas fa-check-circle"></i> Bütün məhsullar normal səviyyədədir.`;
-        alertElement.className = 'alert alert-success';
+        alertElement.className = 'alert alert-info';
     }
 }
 
@@ -158,9 +227,9 @@ function loadPrices() {
         row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.unit}</td>
-            <td id="price-${item.id}">${item.price.toFixed(2)}</td>
+            <td id="price-${item.name.replace(/\s/g, '')}">${item.price.toFixed(2)}</td>
             <td>
-                <button class="btn btn-primary btn-sm" onclick="editIngredientPrice(${item.id}, '${item.name}', ${item.price})"><i class="fas fa-edit"></i> Redaktə</button>
+                <button class="btn btn-primary btn-sm" onclick="editIngredientPrice('${item.name}', ${item.price})"><i class="fas fa-edit"></i> Redaktə</button>
             </td>
         `;
     });
@@ -170,16 +239,15 @@ function loadPrices() {
 // --- B. Əməliyyat Funksiyaları (CRUD/Logic) ---
 
 // Reseptlər
-function editRecipe(id) {
-    const recipe = appData.recipes.find(r => r.id === id);
-    let imagePath = recipe.image_file ? IMAGE_BASE_URL + recipe.image_file : 'Şəkil tapılmadı';
+function editRecipe(name) {
+    const recipe = appData.recipes.find(r => r.name === name);
+    let imagePath = recipe.image_file ? IMAGE_BASE_URL + recipe.image_file : 'Şəkil yoxdur.';
     
-    // Şəkli göstərən nümunə (Siz bunu modal pəncərədə etməlisiniz)
-    alert(`Resept ID ${id}: ${recipe.name}\n\nQiymət: ${recipe.sale_price} AZN\n\nŞəkil Yolu: ${imagePath}`);
+    alert(`Resept: ${recipe.name}\n\nMaya Dəyəri: ${recipe.base_cost.toFixed(2)} AZN\nSatış Qiyməti: ${recipe.sale_price.toFixed(2)} AZN\n\nŞəkil Yolu: ${imagePath}`);
 }
-function deleteRecipe(id) {
-    if (confirm("Bu resepti silməyə əminsinizmi?")) {
-        appData.recipes = appData.recipes.filter(r => r.id !== id);
+function deleteRecipe(name) {
+    if (confirm(`"${name}" reseptini silməyə əminsinizmi?`)) {
+        appData.recipes = appData.recipes.filter(r => r.name !== name);
         saveData();
         loadRecipes();
     }
@@ -190,12 +258,12 @@ function refreshRecipes() { loadRecipes(); }
 function filterOrders() { loadOrders(); }
 function viewOrder(id) {
     const order = appData.orders.find(o => o.id === id);
-    alert(`Sifariş ID: ${order.id}\nStatus: ${order.status}\nMüştəri: ${order.customer}\nTort: ${order.cake}\nÇəki: ${order.weight} kg\nQiymət: ${order.price} AZN`);
+    alert(`Sifariş ID: ${order.id}\nStatus: ${order.status}\nMüştəri: ${order.customer}\nTort: ${order.cake}\nQiymət: ${order.price.toFixed(2)} AZN`);
 }
 
 // Anbar
-function editInventoryItem(id) {
-    const item = appData.inventory.find(i => i.id === id);
+function editInventoryItem(name) {
+    const item = appData.inventory.find(i => i.name === name);
     if (item) {
         const newStock = prompt(`"${item.name}" (Hazırkı qalıq: ${item.stock} ${item.unit}) üçün yeni qalıq miqdarını daxil edin:`);
         if (newStock !== null && !isNaN(parseFloat(newStock))) {
@@ -208,17 +276,15 @@ function editInventoryItem(id) {
 function refreshInventory() { loadInventory(); }
 
 // Qiymətlər
-function editIngredientPrice(id, name, currentPrice) {
-    const newPrice = prompt(`"${name}" (Hazırkı qiymət: ${currentPrice} AZN) üçün yeni qiyməti daxil edin:`);
+function editIngredientPrice(name, currentPrice) {
+    const newPrice = prompt(`"${name}" (Hazırkı qiymət: ${currentPrice.toFixed(2)} AZN) üçün yeni qiyməti daxil edin:`);
     if (newPrice !== null && !isNaN(parseFloat(newPrice))) {
-        const item = appData.inventory.find(i => i.id === id);
+        const item = appData.inventory.find(i => i.name === name);
         if (item) {
             item.price = parseFloat(newPrice);
             saveData();
             loadPrices();
-            // Qiymət dəyişdikdə resept qiymətlərini yeniləməyi unutma
             calculateAllCakePrices(); 
-            loadRecipes(); // Resept tabı aktiv olarsa
         }
     }
 }
@@ -252,15 +318,18 @@ function switchTab(tabId) {
     const activeTabButton = document.querySelector(`.tabs button[onclick*="${tabId}"]`);
     if (activeTabButton) activeTabButton.classList.add('active');
 
+    // Məlumatları yüklə
     if (tabId === 'recipes') loadRecipes();
     if (tabId === 'orders') loadOrders();
     if (tabId === 'inventory') loadInventory();
     if (tabId === 'prices') loadPrices();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeData();
-    // İlk açılan tabı aktiv edib məlumatları yükləyirik
+document.addEventListener('DOMContentLoaded', async () => {
+    // Səhifə yüklənməzdən əvvəl məlumatları çək
+    await initializeData(); 
+    
+    // İlk açılan tabı aktiv et
     const initialTabId = document.querySelector('.tab-content.active') ? document.querySelector('.tab-content.active').id : 'recipes';
     switchTab(initialTabId); 
 });
