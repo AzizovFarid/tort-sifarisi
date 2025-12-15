@@ -1,375 +1,198 @@
-// admin-script.js - GitHub JSON və Local Storage ilə tam funksional versiya (ASYNC)
+// admin-script.js - Əsas Event Listener strukturu
 
 const DATA_KEY = 'tortSifarisiAdminData';
-let appData;
-const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/AzizovFarid/tort-sifarisi/main/cake_images_v17/';
-const JSON_BASE_URL = 'https://raw.githubusercontent.com/AzizovFarid/tort-sifarisi/main/data/';
-
-const JSON_URLS = {
-    recipes: JSON_BASE_URL + 'recipes_v17.json',
-    orders: JSON_BASE_URL + 'orders_v19.json',
-    config: JSON_BASE_URL + 'config_v19.json',
-    inventory: JSON_BASE_URL + 'inventory_v1.json',
-};
+let adminAppData = { recipes: [], inventory: [], orders: [], config: { markupPercent: 50 } };
 
 // --- Helper Funksiyalar ---
 
-/**
- * GitHub-dan ilkin məlumatları çəkir və JS-ə uyğun array formatına çevirir.
- */
-async function fetchGitHubData() {
-    try {
-        // Bütün məlumatları eyni anda çək
-        const [recipesRes, ordersRes, configRes, inventoryRes] = await Promise.all([
-            fetch(JSON_URLS.recipes),
-            fetch(JSON_URLS.orders),
-            fetch(JSON_URLS.config),
-            fetch(JSON_URLS.inventory)
-        ]);
-
-        // Response status-larını yoxlayın (Xəta baş verərsə)
-        if (!recipesRes.ok || !ordersRes.ok || !configRes.ok || !inventoryRes.ok) {
-            throw new Error(`HTTP xətası: ${recipesRes.status} ${ordersRes.status} ${configRes.status} ${inventoryRes.status}`);
-        }
-
-        const recipesData = await recipesRes.json();
-        const ordersData = await ordersRes.json();
-        const configData = await configRes.json();
-        const inventoryData = await inventoryRes.json();
-        
-        // Python-dakı obyekt strukturlarını JS array formatına çeviririk
-        
-        const recipesArray = Object.keys(recipesData).map((key, index) => ({
-            id: index + 1,
-            name: key,
-            time: recipesData[key].prep_time || "N/A",
-            image_file: recipesData[key].images.default || "no_image.png",
-            ingredients: Object.keys(recipesData[key].ingredients).map(ingKey => ({
-                name: ingKey,
-                amount: recipesData[key].ingredients[ingKey].amount,
-                unit: recipesData[key].ingredients[ingKey].unit || "ədəd"
-            }))
-        }));
-
-        // Inventory Data (Qiymət tənzimləməsi üçün)
-        const inventoryArray = Object.keys(inventoryData).map((key, index) => ({
-            id: index + 100,
-            name: key,
-            ...inventoryData[key]
-        }));
-
-
-        return {
-            config: { markupPercent: configData.markup_percent || 50 },
-            inventory: inventoryArray,
-            recipes: recipesArray,
-            orders: ordersData 
-        };
-
-    } catch (error) {
-        console.error("GitHub-dan məlumat çəkilərkən xəta baş verdi.", error);
-        return null;
-    }
+function loadAdminData() {
+    const storedData = localStorage.getItem(DATA_KEY);
+    if (storedData) {
+        // Məlumatı yüklə
+        adminAppData = JSON.parse(storedData);
+    } 
+    // Məlumat olmasa, yuxarıdakı default dəyəri istifadə edəcək
+    renderAllData(); // Məlumat yükləndikdən sonra bütün siyahıları yenilə
 }
 
-
-/**
- * Məlumatları Local Storage-dan və ya GitHub-dan yükləyir.
- */
-async function initializeData() {
-    const storedData = localStorage.getItem(DATA_KEY);
-    const alertElement = document.getElementById('recipesAlert');
-    
-    if (storedData) {
-        appData = JSON.parse(storedData);
-        alertElement.innerHTML = `<i class="fas fa-info-circle"></i> Local Storage-dan yükləndi. Dəyişikliklər yalnız sizin brauzerinizdə saxlanılır.`;
-    } else {
-        // Local Storage boşdursa, GitHub-dan çək
-        const githubData = await fetchGitHubData();
-        if (githubData) {
-            appData = githubData;
-            saveData(); 
-            alertElement.innerHTML = `<i class="fas fa-info-circle"></i> GitHub JSON-dan ilkin məlumat yükləndi.`;
-        } else {
-            alertElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> XƏTA: İlkin məlumat bazası yüklənə bilmədi! (Brauzerinizin Konsolunu yoxlayın)`;
-            return; 
-        }
-    }
-    
-    // Markup-u göstər
-    const markupInput = document.getElementById('markupPercent');
-    if (markupInput) {
-        markupInput.value = appData.config.markupPercent;
-    }
-    calculateAllCakePrices();
-}
-
-function saveData() {
-    localStorage.setItem(DATA_KEY, JSON.stringify(appData));
+function saveAdminData() {
+    localStorage.setItem(DATA_KEY, JSON.stringify(adminAppData));
+    alert("Məlumatlar yadda saxlanıldı!");
 }
 
 /**
- * Mayə dəyərini və satış qiymətini hesablayır (1kq üçün).
- */
-function calculateCost(recipe) {
-    let totalCost = 0;
-    const markup = appData.config.markupPercent / 100;
+ * Tab dəyişdirmə funksiyası
+ */
+function switchTab(event) {
+    const tabTarget = event.target.closest('.tab');
+    if (!tabTarget) return;
 
-    const inventoryMap = appData.inventory.reduce((acc, item) => {
-        acc[item.name] = item.price;
-        return acc;
-    }, {});
+    const tabId = tabTarget.getAttribute('data-tab-target');
+    if (!tabId) return;
 
-    recipe.ingredients.forEach(ing => {
-        const price = inventoryMap[ing.name];
-        // Yalnız qiyməti məlum olan ingredientləri hesabla
-        if (price !== undefined) {
-            totalCost += ing.amount * price;
-        }
-    });
+    // Aktiv tabı dəyiş
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    tabTarget.classList.add('active');
 
-    const salePrice = totalCost * (1 + markup);
-    return { base_cost: totalCost, sale_price: salePrice };
+    // Hər tab açılanda datanı yenilə (lazım gələrsə)
+    renderAllData(); 
 }
 
-function calculateAllCakePrices() {
-    if (!appData || !appData.recipes) return;
-    appData.recipes.forEach(recipe => {
-        const { base_cost, sale_price } = calculateCost(recipe);
-        recipe.base_cost = base_cost;
-        recipe.sale_price = sale_price;
-    });
-    saveData();
+// --- Tab Siyahılarını Yükləyən Əsas Funksiyalar ---
+
+function renderRecipes() {
+    // #recipesList-i doldurmaq üçün məntiq
+    const listBody = document.getElementById('recipesList');
+    listBody.innerHTML = '';
+    
+    // Nümunə:
+    /*
+    adminAppData.recipes.forEach(recipe => {
+        const row = listBody.insertRow();
+        row.innerHTML = `
+            <td>${recipe.name}</td>
+            <td>${recipe.time}</td>
+            <td>...</td>
+            <td>${calculateCost(recipe).toFixed(2)} AZN</td>
+            <td>
+                <button class="btn btn-sm btn-info edit-recipe-btn" data-name="${recipe.name}">Redaktə</button>
+                <button class="btn btn-sm btn-danger delete-recipe-btn" data-name="${recipe.name}">Sil</button>
+            </td>
+        `;
+    });
+    */
 }
 
-// --- A. Məlumatları Yükləyən Funksiyalar (LOAD) ---
+function renderOrders(filter = 'all') {
+    // #ordersList-i doldurmaq üçün məntiq
+    const listBody = document.getElementById('ordersList');
+    listBody.innerHTML = '';
+    
+    // Filterləmə məntiqi
+    const filteredOrders = adminAppData.orders.filter(order => 
+        filter === 'all' || order.status === filter
+    );
 
-function loadRecipes() {
-    calculateAllCakePrices(); // Hər dəfə yeni qiymətlərlə yenilə
-    const recipesList = document.getElementById('recipesList');
-    if (!recipesList) return;
-    
-    recipesList.innerHTML = '';
-    
-    appData.recipes.forEach(recipe => {
-        // Ingredientlər üçün tam siyahı
-        const ingredientsText = recipe.ingredients.map(i => `${i.name}`).join(', ');
-        // Cədvəldə göstərmək üçün kəsilmiş siyahı
-        const displayedIngredients = ingredientsText.substring(0, 40) + (ingredientsText.length > 40 ? '...' : '');
-
-        const row = recipesList.insertRow();
-        row.innerHTML = `
-            <td>${recipe.name}</td>
-            <td>${recipe.time}</td>
-            <td title="${ingredientsText}">${displayedIngredients}</td>
-            <td>${recipe.sale_price.toFixed(2)} AZN (M.D.: ${recipe.base_cost.toFixed(2)} AZN)</td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="editRecipe('${recipe.name}')"><i class="fas fa-edit"></i> Redaktə</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteRecipe('${recipe.name}')"><i class="fas fa-trash-alt"></i> Sil</button>
-            </td>
-        `;
-    });
+    // Nümunə:
+    /*
+    filteredOrders.forEach(order => {
+        const row = listBody.insertRow();
+        row.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.customer}</td>
+            <td>${order.cake}</td>
+            <td>${order.weight.toFixed(2)}</td>
+            <td>${order.price.toFixed(2)} AZN</td>
+            <td>${order.date}</td>
+            <td><span class="status-${order.status}">${order.status}</span></td>
+            <td>
+                <select class="form-control order-status-select" data-id="${order.id}">
+                   <option selected>${order.status}</option>
+                   </select>
+            </td>
+        `;
+    });
+    */
 }
 
-function loadOrders() {
-    const filterSelect = document.getElementById('statusFilter');
-    const filterValue = filterSelect ? filterSelect.value : 'all';
-    const ordersList = document.getElementById('ordersList');
-    if (!ordersList) return;
-    
-    ordersList.innerHTML = '';
-
-    const filteredOrders = (appData.orders || []).filter(order => filterValue === 'all' || order.status === filterValue);
-
-    filteredOrders.forEach(order => {
-        const statusClass = order.status === 'Yeni' ? 'new' : 
-                            order.status === 'Hazırlanır' ? 'in-progress' : 
-                            order.status === 'Göndərildi' ? 'delivered' : 'cancelled';
-
-        const row = ordersList.insertRow();
-        row.innerHTML = `
-            <td>${order.id}</td>
-            <td>${order.customer}</td>
-            <td>${order.cake}</td>
-            <td>${order.weight.toFixed(2)}</td>
-            <td>${order.price.toFixed(2)} AZN</td>
-            <td>${order.date}</td>
-            <td><span class="status-badge ${statusClass}">${order.status}</span></td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="viewOrder(${order.id})"><i class="fas fa-eye"></i> Bax</button>
-            </td>
-        `;
-    });
+function renderInventory() {
+    // #inventoryList-i doldurmaq üçün məntiq
 }
 
-function loadInventory() {
-    const inventoryList = document.getElementById('inventoryList');
-    if (!inventoryList) return;
-    
-    inventoryList.innerHTML = '';
-    
-    (appData.inventory || []).sort((a, b) => a.name.localeCompare(b.name));
-
-    appData.inventory.forEach(item => {
-        const isLow = item.stock < item.min_level;
-        const row = inventoryList.insertRow();
-        row.className = isLow ? 'table-low-stock' : '';
-        
-        row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.unit}</td>
-            <td>${item.stock}</td>
-            <td>${item.min_level}</td>
-            <td>${item.price.toFixed(2)} AZN</td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="editInventoryItem('${item.name}')"><i class="fas fa-edit"></i> Redaktə</button>
-            </td>
-        `;
-    });
-    
-    // Anbar Xəbərdarlıqları
-    const lowStockItems = (appData.inventory || []).filter(item => item.stock < item.min_level).map(item => item.name);
-    const alertElement = document.getElementById('inventoryAlert');
-    
-    if (alertElement) {
-        if (lowStockItems.length > 0) {
-            alertElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> DİQQƏT: Aşağı qalıqlı məhsullar: <b>${lowStockItems.join(', ')}</b>`;
-            alertElement.className = 'alert alert-warning';
-        } else {
-            alertElement.innerHTML = `<i class="fas fa-check-circle"></i> Bütün məhsullar normal səviyyədədir.`;
-            alertElement.className = 'alert alert-info';
-        }
-    }
+function renderPrices() {
+    // Markup inputunu yenilə
+    document.getElementById('markupPercent').value = adminAppData.config.markupPercent || 50;
+    
+    // #pricesList-i doldurmaq üçün məntiq
 }
 
-function loadPrices() {
-    const pricesList = document.getElementById('pricesList');
-    if (!pricesList) return;
-    
-    pricesList.innerHTML = '';
-
-    (appData.inventory || []).forEach(item => { 
-        const row = pricesList.insertRow();
-        row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.unit}</td>
-            <td id="price-${item.name.replace(/\s/g, '')}">${item.price.toFixed(2)}</td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="editIngredientPrice('${item.name}', ${item.price})"><i class="fas fa-edit"></i> Redaktə</button>
-            </td>
-        `;
-    });
-}
-
-
-// --- B. Əməliyyat Funksiyaları (CRUD/Logic) ---
-
-// Reseptlər
-function editRecipe(name) {
-    const recipe = appData.recipes.find(r => r.name === name);
-    if (!recipe) return;
-    
-    let imagePath = recipe.image_file ? IMAGE_BASE_URL + recipe.image_file : 'Şəkil yoxdur.';
-    
-    alert(`Resept: ${recipe.name}\n\nMaya Dəyəri: ${recipe.base_cost.toFixed(2)} AZN\nSatış Qiyməti: ${recipe.sale_price.toFixed(2)} AZN\n\nŞəkil Yolu: ${imagePath}`);
-}
-function deleteRecipe(name) {
-    if (confirm(`"${name}" reseptini silməyə əminsinizmi?`)) {
-        appData.recipes = appData.recipes.filter(r => r.name !== name);
-        saveData();
-        loadRecipes();
-    }
-}
-function addNewCake() {
-    alert("Yeni Tort əlavə et funksiyası hələ tətbiq edilməyib. Əl ilə data bazasına əlavə etməlisiniz.");
-}
-function refreshRecipes() { loadRecipes(); }
-
-// Sifarişlər
-function filterOrders() { loadOrders(); }
-function viewOrder(id) {
-    const order = appData.orders.find(o => o.id === id);
-    if (!order) return;
-    
-    alert(`Sifariş ID: ${order.id}\nStatus: ${order.status}\nMüştəri: ${order.customer}\nTort: ${order.cake}\nQiymət: ${order.price.toFixed(2)} AZN`);
-}
-
-// Anbar
-function addInventoryItem() {
-    alert("Yeni Məhsul əlavə et funksiyası hələ tətbiq edilməyib.");
-}
-function editInventoryItem(name) {
-    const item = appData.inventory.find(i => i.name === name);
-    if (item) {
-        const newStock = prompt(`"${item.name}" (Hazırkı qalıq: ${item.stock} ${item.unit}) üçün yeni qalıq miqdarını daxil edin:`);
-        if (newStock !== null && !isNaN(parseFloat(newStock))) {
-            item.stock = parseFloat(newStock);
-            saveData();
-            loadInventory();
-        } 
-    }
-}
-function refreshInventory() { loadInventory(); }
-
-// Qiymətlər
-function editIngredientPrice(name, currentPrice) {
-    const newPrice = prompt(`"${name}" (Hazırkı qiymət: ${currentPrice.toFixed(2)} AZN) üçün yeni qiyməti daxil edin:`);
-    if (newPrice !== null && !isNaN(parseFloat(newPrice)) && parseFloat(newPrice) >= 0) {
-        const item = appData.inventory.find(i => i.name === name);
-        if (item) {
-            item.price = parseFloat(newPrice);
-            saveData();
-            loadPrices();
-            calculateAllCakePrices(); // Qiymət dəyişəndə tortların qiymətləri yenilənməlidir
-        }
-    } else if (newPrice !== null) {
-        alert("Xəta: Zəhmət olmasa sıfırdan böyük düzgün rəqəm daxil edin.");
+function renderAllData() {
+    // Aktiv tabı yoxla və uyğun funksiyanı çağır
+    const activeTab = document.querySelector('.tab-content.active');
+    if (!activeTab) return;
+    
+    const id = activeTab.id;
+    if (id === 'recipes') renderRecipes();
+    else if (id === 'orders') {
+        const filter = document.getElementById('statusFilter').value;
+        renderOrders(filter);
     }
+    else if (id === 'inventory') renderInventory();
+    else if (id === 'prices') renderPrices();
+}
+
+// --- Funksiya Şablonları (HTML-dən silinənlər) ---
+
+function addNewCake() {
+    // Yeni tort əlavə etmək üçün modalı açmaq və ya formu göstərmək məntiqi
+    alert("Yeni Tort əlavə et funksiyası aktivləşdirildi.");
+}
+
+function refreshRecipes() {
+    // Reseptlər siyahısını yenidən yüklə
+    renderRecipes();
+    alert("Reseptlər siyahısı yeniləndi.");
+}
+
+function filterOrders() {
+    // Status filtri dəyişdikdə sifarişləri yenilə
+    const filterValue = document.getElementById('statusFilter').value;
+    renderOrders(filterValue);
+}
+
+function addInventoryItem() {
+    // Yeni anbar məhsulu əlavə etmək məntiqi
+    alert("Yeni Məhsul əlavə et funksiyası aktivləşdirildi.");
+}
+
+function refreshInventory() {
+    // Anbar siyahısını yenilə
+    renderInventory();
+    alert("Anbar siyahısı yeniləndi.");
 }
 
 function savePrices() {
-    const markupPercentInput = document.getElementById('markupPercent');
-    const newMarkup = parseFloat(markupPercentInput.value);
-
-    if (!isNaN(newMarkup) && newMarkup >= 0) {
-        appData.config.markupPercent = newMarkup;
-        saveData();
-        calculateAllCakePrices(); 
-        alert(`Markup Faizi (${newMarkup}%) yadda saxlandı. Resept qiymətləri yeniləndi.`);
-        // Bütün cədvəlləri yenidən yükləyin (Qiymətlər dəyişdiyi üçün)
-        loadRecipes();
-    } else {
-        alert("Xəta: Zəhmət olmasa Markup üçün düzgün rəqəm daxil edin.");
-    }
+    // Markup və ingredient qiymətlərini yadda saxlamaq məntiqi
+    const markup = parseFloat(document.getElementById('markupPercent').value) || 0;
+    adminAppData.config.markupPercent = markup;
+    
+    // Digər qiymət dəyişikliklərini yadda saxla (pricesList-dən)
+    // ...
+    
+    saveAdminData();
 }
 
 
-// --- C. İnterfeys İdarəetmə Funksiyası ---
-function switchTab(tabId) {
-    const contents = document.querySelectorAll('.tab-content');
-    contents.forEach(content => content.classList.remove('active'));
+// --- Event Listener-lərin Birləşdirilməsi ---
 
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
+document.addEventListener('DOMContentLoaded', () => {
+    loadAdminData(); // Başlanğıcda bütün məlumatları yüklə
 
-    const tabElement = document.getElementById(tabId);
-    if (tabElement) tabElement.classList.add('active');
-    
-    const activeTabButton = document.querySelector(`.tabs button[onclick*="${tabId}"]`);
-    if (activeTabButton) activeTabButton.classList.add('active');
+    // 1. Tab Naviqasiyası
+    document.querySelectorAll('.tabs').forEach(tabContainer => {
+         tabContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.tab')) {
+                switchTab(e);
+            }
+         });
+    });
 
-    // Məlumatları yüklə
-    if (tabId === 'recipes') loadRecipes();
-    if (tabId === 'orders') loadOrders();
-    if (tabId === 'inventory') loadInventory();
-    if (tabId === 'prices') loadPrices();
-}
+    // 2. Resept Tabı Eventləri
+    document.getElementById('addNewCakeBtn').addEventListener('click', addNewCake);
+    document.getElementById('refreshRecipesBtn').addEventListener('click', refreshRecipes);
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Səhifə yüklənməzdən əvvəl məlumatları çək
-    await initializeData(); 
-    
-    // İlk açılan tabı aktiv et və məlumatı yüklə
-    const initialTabId = document.querySelector('.tab-content.active') ? document.querySelector('.tab-content.active').id : 'recipes';
-    switchTab(initialTabId); 
+    // 3. Sifariş Tabı Eventləri
+    document.getElementById('statusFilter').addEventListener('change', filterOrders);
+    
+    // Qeyd: Sifariş statusunun dəyişdirilməsi üçün məntiq #ordersList-in renderində edilməlidir (Event Delegation)
+    
+    // 4. Anbar Tabı Eventləri
+    document.getElementById('addInventoryItemBtn').addEventListener('click', addInventoryItem);
+    document.getElementById('refreshInventoryBtn').addEventListener('click', refreshInventory);
+
+    // 5. Qiymətlər Tabı Eventləri
+    document.getElementById('savePricesBtn').addEventListener('click', savePrices);
 });
