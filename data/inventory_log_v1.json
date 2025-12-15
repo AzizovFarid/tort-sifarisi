@@ -1,0 +1,53 @@
+﻿[
+  {
+    "timestamp": "2025-12-11T12:46:04.800689",
+    "item": "Jelatin",
+    "delta": 20.0,
+    "reason": "edit"
+  },
+  {
+    "timestamp": "2025-12-11T12:46:39.141143",
+    "item": "Kakao",
+    "delta": 50.0,
+    "reason": "edit"
+  },
+  {
+    "timestamp": "2025-12-11T12:47:08.481524",
+    "item": "Kərə yağı",
+    "delta": 100.0,
+    "reason": "edit"
+  },
+  {
+    "timestamp": "2025-12-11T12:47:41.483601",
+    "item": "Süd",
+    "delta": 30.0,
+    "reason": "edit"
+  },
+  {
+    "timestamp": "2025-12-11T12:57:08.519372",
+    "item": "sd",
+    "delta": 20.0,
+    "reason": "edit"
+  },
+  {
+    "timestamp": "2025-12-11T12:57:45.454613",
+    "item": "sd",
+    "delta": -1.0,
+    "result_qty": 19.0,
+    "reason": "order:sad"
+  },
+  {
+    "timestamp": "2025-12-11T14:51:48.980342",
+    "item": "sd",
+    "delta": -1.0,
+    "result_qty": 18.0,
+    "reason": "order:sad_id:1765448927578"
+  },
+  {
+    "timestamp": "2025-12-11T15:44:30.223937",
+    "item": "sd",
+    "delta": -4.0,
+    "result_qty": 14.0,
+    "reason": "order:sad_id:1765453418953"
+  }
+]

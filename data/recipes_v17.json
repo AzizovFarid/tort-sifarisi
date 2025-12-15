@@ -1,0 +1,152 @@
+﻿{
+  "Quş Südü tortu": {
+    "prep_time": "120 dəq",
+    "images": {
+      "0.0": "Quş_Sudu_tortu_0_0.png",
+      "0.3": "Quş_Sudu_tortu_0_3.png",
+      "0.5": "Quş_Sudu_tortu_0_5.png",
+      "1.0": "Quş_Sudu_tortu_1_0.png",
+      "3.0": "Quş_Sudu_tortu_3_0.png",
+      "5.0": "Quş_Sudu_tortu_5_0.png"
+    },
+    "ingredients": {
+      "Yumurta": [
+        "əd",
+        3.0
+      ],
+      "Şəkər": [
+        "g",
+        380.0
+      ],
+      "Un": [
+        "g",
+        90.0
+      ],
+      "Jelatin": [
+        "g",
+        15.0
+      ],
+      "Kərə yağı": [
+        "g",
+        120.0
+      ],
+      "Süd": [
+        "ml",
+        80.0
+      ],
+      "Kakao": [
+        "g",
+        20.0
+      ],
+      "asd": [
+        "kg",
+        3.0
+      ],
+      "sdf": [
+        "g",
+        0.5
+      ]
+    }
+  },
+  "test": {
+    "prep_time": "120 dəq",
+    "images": {
+      "0.0": "test_0_0.png",
+      "0.5": "test_0_5.png",
+      "1.0": "test_1_0.png",
+      "3.0": "test_3_0.png",
+      "5.0": "test_5_0.png"
+    },
+    "ingredients": {
+      "asd": [
+        "əd",
+        1.0
+      ],
+      "dsf": [
+        "kg",
+        3.4
+      ],
+      "dsfasd": [
+        "g",
+        7.5
+      ],
+      "cxds": [
+        "ml",
+        5.7
+      ]
+    }
+  },
+  "sad": {
+    "prep_time": "120 dəq",
+    "images": {
+      "0.0": "sad_0_0.png",
+      "0.3": "sad_0_3.png",
+      "1.0": "sad_1_0.png",
+      "3.0": "sad_3_0.png",
+      "5.0": "sad_5_0.png"
+    },
+    "ingredients": {
+      "sd": [
+        "əd",
+        1.0
+      ]
+    }
+  },
+  "ferid": {
+    "prep_time": "120 dəq",
+    "images": {
+      "0.0": "ferid_0_0.png",
+      "0.3": "ferid_0_3.png",
+      "0.5": "ferid_0_5.png",
+      "1.0": "ferid_1_0.png",
+      "3.0": "ferid_3_0.png",
+      "5.0": "ferid_5_0.png"
+    },
+    "ingredients": {
+      "Jelatin": [
+        "g",
+        100.0
+      ],
+      "Kakao": [
+        "g",
+        50.0
+      ],
+      "Kərə yağı": [
+        "g",
+        20.0
+      ],
+      "Süd": [
+        "ml",
+        4.0
+      ]
+    }
+  },
+  "omlet": {
+    "prep_time": "170 dəq",
+    "images": {
+      "0.0": "omlet_0_0.png",
+      "0.3": "omlet_0_3.png",
+      "1.0": "omlet_1_0.png",
+      "3.0": "omlet_3_0.png",
+      "5.0": "omlet_5_0.png"
+    },
+    "ingredients": {
+      "yumurta": [
+        "əd",
+        15.0
+      ],
+      "duyu": [
+        "kg",
+        3.0
+      ],
+      "sud": [
+        "ml",
+        6.0
+      ],
+      "tut": [
+        "g",
+        5.0
+      ]
+    }
+  }
+}

@@ -1,0 +1,72 @@
+﻿{
+  "Yumurta": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "əd"
+  },
+  "Şəkər": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "g"
+  },
+  "Un": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "g"
+  },
+  "Jelatin": {
+    "unit": "g",
+    "qty": 20.0,
+    "price": 25.0,
+    "min": 18.0
+  },
+  "Kərə yağı": {
+    "unit": "g",
+    "qty": 100.0,
+    "price": 40.0,
+    "min": 35.0
+  },
+  "Süd": {
+    "unit": "ml",
+    "qty": 30.0,
+    "price": 30.0,
+    "min": 15.0
+  },
+  "Kakao": {
+    "unit": "g",
+    "qty": 50.0,
+    "price": 10.0,
+    "min": 9.0
+  },
+  "asd": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "kg"
+  },
+  "sdf": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "g"
+  },
+  "dsf": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "kg"
+  },
+  "dsfasd": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "g"
+  },
+  "cxds": {
+    "qty": 0.0,
+    "min": 0.0,
+    "unit": "ml"
+  },
+  "sd": {
+    "unit": "əd",
+    "qty": 14.0,
+    "price": 32.0,
+    "min": 12.0
+  }
+}
