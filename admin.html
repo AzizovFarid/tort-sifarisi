@@ -13,7 +13,7 @@
             <h1><i class="fas fa-user-shield"></i> Admin Panel</h1>
             <p>Tort Reseptləri və Xərc Kalkulyatoru - ADMIN</p>
             <div style="margin-top: 15px;">
-                <a href="index.html" class="btn" style="background: #7f8c8d;">Ana Səhifə</a>
+                <a href="index.html" class="btn btn-secondary">Ana Səhifə</a>
                 <a href="customer.html" class="btn btn-success">Müştəri Görünüşü</a>
             </div>
         </header>
@@ -34,7 +34,6 @@
                 </button>
             </div>
             
-            <!-- Tort Reseptləri -->
             <div id="recipes" class="tab-content active">
                 <h2><i class="fas fa-birthday-cake"></i> Tort Reseptlərinin İdarə Edilməsi</h2>
                 
@@ -42,7 +41,7 @@
                     <i class="fas fa-info-circle"></i> Tort reseptlərinizi buradan idarə edin
                 </div>
                 
-                <div style="margin-bottom: 20px;">
+                <div class="button-group">
                     <button class="btn btn-primary" onclick="addNewCake()">
                         <i class="fas fa-plus"></i> Yeni Tort
                     </button>
@@ -62,13 +61,29 @@
                             </tr>
                         </thead>
                         <tbody id="recipesList">
-                            <!-- JavaScript ilə doldurulacaq -->
-                        </tbody>
+                            <tr>
+                                <td>Quru Südlü Tortu</td>
+                                <td>120 dəq</td>
+                                <td>Yumurta, Şəkər, Un, Jelatin, Kərə yağı, Süd, Kakao, asd, sdf</td>
+                                <td>
+                                    <button class="btn btn-primary">Redaktə</button>
+                                    <button class="btn btn-danger">Sil</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Test</td>
+                                <td>120 dəq</td>
+                                <td>asd, dfsasd, cxds</td>
+                                <td>
+                                    <button class="btn btn-primary">Redaktə</button>
+                                    <button class="btn btn-danger">Sil</button>
+                                </td>
+                            </tr>
+                            </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Sifarişlər -->
             <div id="orders" class="tab-content">
                 <h2><i class="fas fa-clipboard-list"></i> Sifariş İzlənməsi</h2>
                 
@@ -78,7 +93,7 @@
                 
                 <div style="margin-bottom: 20px;">
                     <div class="form-group" style="max-width: 300px;">
-                        <label>Statusa görə filtr:</label>
+                        <label for="statusFilter">Statusa görə filtr:</label>
                         <select class="form-control" id="statusFilter" onchange="filterOrders()">
                             <option value="all">Hamısı</option>
                             <option value="Yeni">Yeni</option>
@@ -104,13 +119,31 @@
                             </tr>
                         </thead>
                         <tbody id="ordersList">
-                            <!-- JavaScript ilə doldurulacaq -->
+                            <tr>
+                                <td>1</td>
+                                <td>Əli Quliyev</td>
+                                <td>Quru Südlü Tortu</td>
+                                <td>1.5</td>
+                                <td>45 AZN</td>
+                                <td>2025-12-15</td>
+                                <td><span class="status-badge new">Yeni</span></td>
+                                <td><button class="btn btn-primary">Bax</button></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Aynur Məmmədova</td>
+                                <td>Qırmızı Məxmər</td>
+                                <td>2.0</td>
+                                <td>60 AZN</td>
+                                <td>2025-12-14</td>
+                                <td><span class="status-badge in-progress">Hazırlanır</span></td>
+                                <td><button class="btn btn-primary">Bax</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Anbar -->
             <div id="inventory" class="tab-content">
                 <h2><i class="fas fa-warehouse"></i> Anbar İdarəçiliyi</h2>
                 
@@ -118,7 +151,7 @@
                     <i class="fas fa-exclamation-triangle"></i> Minimum səviyyəyə çatan məhsullar burada göstəriləcək
                 </div>
                 
-                <div style="margin-bottom: 20px;">
+                <div class="button-group">
                     <button class="btn btn-primary" onclick="addInventoryItem()">
                         <i class="fas fa-plus"></i> Yeni Məhsul
                     </button>
@@ -140,13 +173,27 @@
                             </tr>
                         </thead>
                         <tbody id="inventoryList">
-                            <!-- JavaScript ilə doldurulacaq -->
+                            <tr>
+                                <td>Yumurta</td>
+                                <td>ədəd</td>
+                                <td>150</td>
+                                <td>50</td>
+                                <td>0.20 AZN</td>
+                                <td><button class="btn btn-primary">Tənzimlə</button></td>
+                            </tr>
+                            <tr>
+                                <td>Un</td>
+                                <td>kq</td>
+                                <td>12</td>
+                                <td>5</td>
+                                <td>1.50 AZN</td>
+                                <td><button class="btn btn-primary">Tənzimlə</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- Qiymətlər -->
             <div id="prices" class="tab-content">
                 <h2><i class="fas fa-dollar-sign"></i> Vahid Qiymətlər və Markup</h2>
                 
@@ -171,12 +218,23 @@
                             </tr>
                         </thead>
                         <tbody id="pricesList">
-                            <!-- JavaScript ilə doldurulacaq -->
+                            <tr>
+                                <td>Şəkər</td>
+                                <td>kq</td>
+                                <td>1.20</td>
+                                <td><button class="btn btn-primary">Redaktə</button></td>
+                            </tr>
+                            <tr>
+                                <td>Süd</td>
+                                <td>litr</td>
+                                <td>1.80</td>
+                                <td><button class="btn btn-primary">Redaktə</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 
-                <button class="btn btn-primary" onclick="savePrices()">
+                <button class="btn btn-success" onclick="savePrices()" style="margin-top: 20px;">
                     <i class="fas fa-save"></i> Qiymətləri Yadda Saxla
                 </button>
             </div>
