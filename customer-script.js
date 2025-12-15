@@ -10,6 +10,7 @@ const KG_PER_PERSON = 0.2; // 1 nəfər üçün təxmini çəki
 // --- Helper Funksiyalar ---
 
 function loadCustomerData() {
+    // Local Storage-dan məlumat bazasını yükləyir (Admin panelinin yadda saxladığı məlumatı)
     const storedData = localStorage.getItem(DATA_KEY);
     if (storedData) {
         customerAppData = JSON.parse(storedData);
@@ -24,7 +25,7 @@ function loadCustomerData() {
  */
 function calculateCost(recipe) {
     let totalCost = 0;
-    // Markup yoxdursa 0 istifadə et (və ya default 50)
+    // Markup yoxdursa 0 istifadə et
     const markup = (customerAppData.config.markupPercent || 0) / 100;
 
     const inventoryMap = customerAppData.inventory.reduce((acc, item) => {
@@ -35,7 +36,8 @@ function calculateCost(recipe) {
     recipe.ingredients.forEach(ing => {
         const price = inventoryMap[ing.name];
         if (price !== undefined) {
-            totalCost += ing.amount * price;
+            // Nəzərə al: reseptdəki ing.amount 1 kq-a düşən miqdardır.
+            totalCost += ing.amount * price; 
         }
     });
 
@@ -47,11 +49,9 @@ function calculateCost(recipe) {
 // --- İnterfeys Məlumatlarını Yükləmə ---
 
 function populateCakeSelection(filter = '') {
-    // loadCustomerData(); // Artıq DOMContentLoaded-da yüklənib
     const cakeSelect = document.getElementById('cakeSelect');  
     if (!cakeSelect) return;
 
-    // Hal-hazırda seçilmiş dəyəri yadda saxla
     const selectedValue = cakeSelect.value;
     
     cakeSelect.innerHTML = '<option value="">Seçin...</option>';  
@@ -76,11 +76,9 @@ function populateCakeSelection(filter = '') {
     // Əvvəlki seçimi bərpa et
     if (selectedValue && filteredRecipes.some(r => r.name === selectedValue)) {
         cakeSelect.value = selectedValue;
-    } else if (filteredRecipes.length > 0) {
+    } else if (filteredRecipes.length > 0 && !filter) {
         // Əgər filter yoxdursa və boşdursa, birinci tortu seç
-        if (!filter && !selectedValue) {
-             cakeSelect.value = filteredRecipes[0].name;
-        }
+        cakeSelect.value = filteredRecipes[0].name;
     }
     
     loadCakeDetails();
@@ -90,21 +88,24 @@ function populateCakeSelection(filter = '') {
  * Çəki, qiymət, nəfər sayı və tortun şəklini yeniləyir.
  */
 function loadCakeDetails() {
-    calculatePrice(); // Qiyməti və çəkini hesabla
+    calculatePrice(); // Qiyməti hesabla (və nəfər sayını yenilə)
     displayCakeImage(); // Şəkli göstər
 }
 
 function calculatePrice() {
     const cakeName = document.getElementById('cakeSelect').value;
     const weightInput = document.getElementById('weight');
-    const weight = parseFloat(weightInput.value) || 0; // Çəki 0 da ola bilər (yoxlanılacaq)
+    // Qiymət hesablanması üçün minimum 0.1 kq götürülür
+    const weight = parseFloat(weightInput.value) < 0.1 ? 0.1 : parseFloat(weightInput.value) || 0;
+    
+    weightInput.value = weight.toFixed(1); // Giriş dəyərini formatla
     
     const recipe = customerAppData.recipes.find(r => r.name === cakeName);
     const finalPriceDisplay = document.getElementById('finalPrice');
     const prepTimeDisplay = document.getElementById('prepTime');
 
     if (recipe && weight > 0) {
-        const baseSalePrice = recipe.sale_price || calculateCost(recipe); // Əgər populateCakeSelection-da hesablanmayıbsa
+        const baseSalePrice = recipe.sale_price || calculateCost(recipe); 
         const finalPrice = baseSalePrice * weight;
 
         finalPriceDisplay.textContent = `${finalPrice.toFixed(2)} AZN`;
@@ -118,8 +119,6 @@ function calculatePrice() {
         prepTimeDisplay.textContent = 'Hazırlıq vaxtı: -';
         document.getElementById('personCount').value = 0;
     }
-    // Anbar xəbərdarlığını burada əlavə etmək üçün, anbar məlumatlarına ehtiyac var.
-    // Təqdim olunan kodda "priceWarning" elementini göstərən bir məntiq yoxdur.
 }
 
 function displayCakeImage() {
@@ -148,6 +147,9 @@ function filterCakes(event) {
     populateCakeSelection(filterValue);
 }
 
+// Bu funksiya artıq readonly olduğu üçün, çəki inputu yenilənəndə işləyəcək
+// Ancaq əgər istifadəçi JS-i dəyişib "Nəfər sayı"nı manual etmək istəsə bu funksiyadan istifadə edə bilər.
+/*
 function updateWeightFromPersons(event) {
     const personCount = parseFloat(event.target.value) || 0;
     const newWeight = (personCount * KG_PER_PERSON);
@@ -155,10 +157,12 @@ function updateWeightFromPersons(event) {
     document.getElementById('weight').value = newWeight.toFixed(1);
     calculatePrice();
 }
+*/
 
 function updatePersonCountFromWeight(weight) {
     if (weight > 0) {
-        const personCount = Math.ceil(weight / KG_PER_PERSON);
+        // Həmişə yuxarı yuvarla
+        const personCount = Math.ceil(weight / KG_PER_PERSON); 
         document.getElementById('personCount').value = personCount;
     }
 }
@@ -167,26 +171,30 @@ function setTextColor(event) {
     const color = event.target.getAttribute('data-color');
     if (color) {
         document.getElementById('textColor').value = color;
-        // Əlavə olaraq aktiv düyməni göstərmək üçün stil əlavə edilə bilər
+        // Aktiv düymənin stilini yenilə
         document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active-color'));
         event.target.classList.add('active-color');
     }
 }
 
 function switchTab(event) {
-    const tabId = event.target.getAttribute('data-tab-target');
-    if (!tabId) return;
+    // Təmin etdiyiniz HTML-dəki tab düymələri <button class="tab" data-tab-target="order">
+    const tabTarget = event.target.closest('.tab');
+    if (!tabTarget) return;
+
+    const tabId = tabTarget.getAttribute('data-tab-target');
 
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
+    tabTarget.classList.add('active');
 }
 
 function setMinDeliveryDate() {
     const today = new Date();
+    // Gələcək ən yaxın tarixi təyin et (bu gün)
     const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Yanvar 0-dır!
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const minDate = `${yyyy}-${mm}-${dd}`;
     
@@ -201,8 +209,8 @@ function placeOrder(event) {
 
     const orderForm = document.getElementById('orderForm');
     if (!orderForm.checkValidity()) {
-        alert("Zəhmət olmasa bütün tələb olunan sahələri düzgün doldurun.");
-        return;
+        // Brauzerin default validation mesajlarını göstərməsinə icazə verilir
+        return; 
     }
 
     const cake = document.getElementById('cakeSelect').value;
@@ -218,12 +226,14 @@ function placeOrder(event) {
     const price = parseFloat(priceText.replace(' AZN', ''));
     
     if (price === 0 || isNaN(price)) {
-        alert("Zəhmət olmasa tortu seçin və çəkini düzgün daxil edin.");
+        document.getElementById('orderResult').innerHTML = `
+            <div class="alert alert-danger">❌ Sifariş vermək üçün zəhmət olmasa bir tort seçin və çəkini düzgün daxil edin.</div>`;
         return;
     }
 
     const currentOrders = customerAppData.orders || [];
-    const newOrderId = currentOrders.length > 0 ? Math.max(...currentOrders.map(o => o.id)) + 1 : 1;
+    // Yeni Sifariş ID-si
+    const newOrderId = currentOrders.length > 0 ? Math.max(...currentOrders.map(o => o.id)) + 1 : 1; 
 
     const newOrder = {
         id: newOrderId,
@@ -234,7 +244,7 @@ function placeOrder(event) {
         price: price,
         date: date,
         description: description,
-        textStyle: { color: textColor, size: fontSize }, // Əlavə olunan yazı stili məlumatı
+        textStyle: { color: textColor, size: fontSize }, 
         status: "Yeni"
     };
 
@@ -248,16 +258,17 @@ function placeOrder(event) {
         </div>
     `;
 
-    // Tort seçimlərini yenidən yükləyin
+    // Formu sıfırla
+    orderForm.reset(); 
+    // Sıfırlandıqdan sonra yenidən ilkin məlumatları yüklə
     populateCakeSelection();
-    orderForm.reset(); // Sifariş tamamlandıqdan sonra formu sıfırla
 }
 
 
 // --- Sifariş İzləmə ---
 
 function trackOrder(event) {
-    event.preventDefault(); // Formun standart submit davranışını dayandır
+    event.preventDefault(); 
     
     const trackOrderId = document.getElementById('trackOrderId').value.trim();
     const resultDiv = document.getElementById('trackingResult');
@@ -298,22 +309,27 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCustomerData();
     setMinDeliveryDate();
 
-    // Sifariş Formu Eventləri
+    // Elementləri al
     const cakeSelect = document.getElementById('cakeSelect');
     const weightInput = document.getElementById('weight');
-    const personCountInput = document.getElementById('personCount');
     const searchCakeInput = document.getElementById('searchCake');
     const orderForm = document.getElementById('orderForm');
+    const trackingForm = document.getElementById('trackingForm');
 
     // Məzmun yükləndikdən sonra seçimləri doldur
     populateCakeSelection();
 
     // Event Listener-lərin bağlanması
-    cakeSelect.addEventListener('change', loadCakeDetails);
-    weightInput.addEventListener('input', calculatePrice); // İnput zamanı yenilə
-    personCountInput.addEventListener('input', updateWeightFromPersons);
-    searchCakeInput.addEventListener('keyup', filterCakes);
-    orderForm.addEventListener('submit', placeOrder);
+    if (cakeSelect) cakeSelect.addEventListener('change', loadCakeDetails);
+    
+    // Çəki inputu dəyişəndə qiymət yenilənsin
+    if (weightInput) weightInput.addEventListener('input', calculatePrice); 
+    
+    // Axtarış
+    if (searchCakeInput) searchCakeInput.addEventListener('keyup', filterCakes);
+    
+    // Sifariş formunu təsdiqləmə
+    if (orderForm) orderForm.addEventListener('submit', placeOrder);
 
     // Yazı rəngi seçimi
     document.querySelectorAll('.color-btn').forEach(btn => {
@@ -327,12 +343,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Tab dəyişdirmə
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', switchTab);
+    document.querySelectorAll('.tabs').forEach(tabContainer => {
+         tabContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.tab')) {
+                switchTab(e);
+            }
+         });
     });
 
     // İzləmə Formu Eventi
-    const trackingForm = document.getElementById('trackingForm');
     if (trackingForm) {
         trackingForm.addEventListener('submit', trackOrder);
     }
