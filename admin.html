@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Tort Sifarişi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-user-shield"></i> Admin Panel</h1>
+            <p>Tort Reseptləri və Xərc Kalkulyatoru - ADMIN</p>
+            <div style="margin-top: 15px;">
+                <a href="index.html" class="btn" style="background: #7f8c8d;">Ana Səhifə</a>
+                <a href="customer.html" class="btn btn-success">Müştəri Görünüşü</a>
+            </div>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('recipes')">
+                    <i class="fas fa-birthday-cake"></i> Tort Reseptləri
+                </button>
+                <button class="tab" onclick="switchTab('orders')">
+                    <i class="fas fa-clipboard-list"></i> Sifarişlər
+                </button>
+                <button class="tab" onclick="switchTab('inventory')">
+                    <i class="fas fa-warehouse"></i> Anbar
+                </button>
+                <button class="tab" onclick="switchTab('prices')">
+                    <i class="fas fa-dollar-sign"></i> Qiymətlər
+                </button>
+            </div>
+            
+            <!-- Tort Reseptləri -->
+            <div id="recipes" class="tab-content active">
+                <h2><i class="fas fa-birthday-cake"></i> Tort Reseptlərinin İdarə Edilməsi</h2>
+                
+                <div class="alert alert-info" id="recipesAlert">
+                    <i class="fas fa-info-circle"></i> Tort reseptlərinizi buradan idarə edin
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="addNewCake()">
+                        <i class="fas fa-plus"></i> Yeni Tort
+                    </button>
+                    <button class="btn btn-success" onclick="refreshRecipes()">
+                        <i class="fas fa-sync"></i> Yenilə
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="recipesTable">
+                        <thead>
+                            <tr>
+                                <th>Tort Adı</th>
+                                <th>Hazırlıq Vaxtı</th>
+                                <th>Ingredientlər</th>
+                                <th>Əməliyyatlar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipesList">
+                            <!-- JavaScript ilə doldurulacaq -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Sifarişlər -->
+            <div id="orders" class="tab-content">
+                <h2><i class="fas fa-clipboard-list"></i> Sifariş İzlənməsi</h2>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Bütün sifarişlərin siyahısı
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div class="form-group" style="max-width: 300px;">
+                        <label>Statusa görə filtr:</label>
+                        <select class="form-control" id="statusFilter" onchange="filterOrders()">
+                            <option value="all">Hamısı</option>
+                            <option value="Yeni">Yeni</option>
+                            <option value="Hazırlanır">Hazırlanır</option>
+                            <option value="Göndərildi">Göndərildi</option>
+                            <option value="Ləğv edildi">Ləğv edildi</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Müştəri</th>
+                                <th>Tort</th>
+                                <th>Çəki (kg)</th>
+                                <th>Qiymət</th>
+                                <th>Tarix</th>
+                                <th>Status</th>
+                                <th>Əməliyyatlar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersList">
+                            <!-- JavaScript ilə doldurulacaq -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Anbar -->
+            <div id="inventory" class="tab-content">
+                <h2><i class="fas fa-warehouse"></i> Anbar İdarəçiliyi</h2>
+                
+                <div class="alert alert-warning" id="inventoryAlert">
+                    <i class="fas fa-exclamation-triangle"></i> Minimum səviyyəyə çatan məhsullar burada göstəriləcək
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="addInventoryItem()">
+                        <i class="fas fa-plus"></i> Yeni Məhsul
+                    </button>
+                    <button class="btn btn-success" onclick="refreshInventory()">
+                        <i class="fas fa-sync"></i> Yenilə
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>Məhsul Adı</th>
+                                <th>Ölçü</th>
+                                <th>Qalıq</th>
+                                <th>Min. Səviyyə</th>
+                                <th>Qiymət (vahid)</th>
+                                <th>Əməliyyatlar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryList">
+                            <!-- JavaScript ilə doldurulacaq -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Qiymətlər -->
+            <div id="prices" class="tab-content">
+                <h2><i class="fas fa-dollar-sign"></i> Vahid Qiymətlər və Markup</h2>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Ingredient vahid qiymətlərini və markup faizini tənzimləyin
+                </div>
+                
+                <div class="form-group" style="max-width: 300px;">
+                    <label for="markupPercent">Markup Faizi (%):</label>
+                    <input type="number" id="markupPercent" class="form-control" step="0.1" min="0" max="500" value="50">
+                </div>
+                
+                <h3>Ingredient Qiymətləri</h3>
+                <div class="table-container">
+                    <table class="table" id="pricesTable">
+                        <thead>
+                            <tr>
+                                <th>Ingredient</th>
+                                <th>Vahid</th>
+                                <th>Qiymət (AZN)</th>
+                                <th>Əməliyyat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pricesList">
+                            <!-- JavaScript ilə doldurulacaq -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button class="btn btn-primary" onclick="savePrices()">
+                    <i class="fas fa-save"></i> Qiymətləri Yadda Saxla
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>GitHub: <a href="https://github.com/AzizovFarid/tort-sifarisi">AzizovFarid/tort-sifarisi</a></p>
+        </footer>
+    </div>
+    
+    <script src="admin-script.js"></script>
+</body>
+</html>
