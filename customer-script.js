@@ -1,31 +1,37 @@
 // customer-script.js - Müştəri görünüşü üçün əsas məntiq
-
-// Local Storage açarı admin skripti ilə eyni olmalıdır!
 const DATA_KEY = 'tortSifarisiAdminData';
 const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/AzizovFarid/tort-sifarisi/main/cake_images_v17/';
 
 let customerAppData;
 
 function loadCustomerData() {
+    // Admin skriptində Local Storage-a yadda saxlanılan datanı yüklə
     const storedData = localStorage.getItem(DATA_KEY);
     if (storedData) {
         customerAppData = JSON.parse(storedData);
     } else {
-        // Məlumat yoxdursa adminin yaratdığı default datanı yüklə
-        alert("Xəta: Admin məlumat bazası mövcud deyil!");
-        customerAppData = { recipes: [], config: { markupPercent: 0 } };
+        // Əgər admin hələ heç nəyi Local Storage-ə saxlamayıbsa, xəbərdarlıq et
+        customerAppData = { recipes: [], inventory: [], orders: [], config: { markupPercent: 0 } };
+        document.getElementById('priceDisplay').textContent = "Məlumat bazası yoxdur. Admin Panelini yoxlayın.";
     }
 }
 
-// Admin skriptindəki calculateCost funksiyasının eynisi
+/**
+ * calculate_cost funksiyası (Admin Panelindən eyni məntiq)
+ */
 function calculateCost(recipe) {
     let totalCost = 0;
     const markup = customerAppData.config.markupPercent / 100;
 
+    const inventoryMap = customerAppData.inventory.reduce((acc, item) => {
+        acc[item.name] = item.price;
+        return acc;
+    }, {});
+
     recipe.ingredients.forEach(ing => {
-        const item = customerAppData.inventory.find(i => i.name === ing.name);
-        if (item) {
-            totalCost += ing.amount * item.price;
+        const price = inventoryMap[ing.name];
+        if (price !== undefined) {
+            totalCost += ing.amount * price;
         }
     });
 
@@ -38,39 +44,40 @@ function calculateCost(recipe) {
 
 function populateCakeSelection() {
     loadCustomerData();
-    const cakeSelect = document.getElementById('cakeName'); // customer.html-də olmalıdır
+    const cakeSelect = document.getElementById('cakeName'); 
     if (!cakeSelect) return;
 
-    // Seçim sahəsini təmizlə
     cakeSelect.innerHTML = '<option value="">--- Tort Seçin ---</option>'; 
     customerAppData.recipes.forEach(recipe => {
         const option = document.createElement('option');
         option.value = recipe.name;
-        option.textContent = recipe.name;
+        // Əgər qiymət hesablanıbsa göstər
+        option.textContent = `${recipe.name} (${recipe.sale_price ? recipe.sale_price.toFixed(2) + ' AZN/kq' : 'Qiymət yoxdur'})`;
         cakeSelect.appendChild(option);
     });
 
-    // İlk tortu seçin və qiyməti hesablayın
     if(customerAppData.recipes.length > 0) {
-        cakeSelect.value = customerAppData.recipes[0].name;
+        // İlk elementi seçib detalları yüklə
+        document.getElementById('weight').value = 1.0; 
         updateCakeDetails();
     }
 }
 
 function updateCakeDetails() {
     const cakeName = document.getElementById('cakeName').value;
-    const weight = parseFloat(document.getElementById('weight').value) || 1;
+    const weightInput = document.getElementById('weight');
+    const weight = parseFloat(weightInput.value) || 1;
     
     const recipe = customerAppData.recipes.find(r => r.name === cakeName);
-    const priceDisplay = document.getElementById('priceDisplay'); // customer.html-də olmalıdır
-    const imageContainer = document.getElementById('cakeImage'); // customer.html-də olmalıdır
+    const priceDisplay = document.getElementById('priceDisplay');
+    const imageContainer = document.getElementById('cakeImage');
 
     if (recipe) {
-        const baseSalePrice = calculateCost(recipe); // 1 kg üçün qiymət (fərz edək)
+        const baseSalePrice = calculateCost(recipe); 
         const finalPrice = baseSalePrice * weight;
 
         priceDisplay.textContent = `${finalPrice.toFixed(2)} AZN`;
-
+        
         // Şəkli göstər
         if (recipe.image_file && imageContainer) {
             imageContainer.src = IMAGE_BASE_URL + recipe.image_file;
@@ -99,7 +106,8 @@ function submitOrder() {
         return;
     }
 
-    const newOrderId = Math.max(...customerAppData.orders.map(o => o.id)) + 1 || 1;
+    const currentOrders = customerAppData.orders || [];
+    const newOrderId = currentOrders.length > 0 ? Math.max(...currentOrders.map(o => o.id)) + 1 : 1;
 
     const newOrder = {
         id: newOrderId,
@@ -113,14 +121,17 @@ function submitOrder() {
     };
 
     customerAppData.orders.push(newOrder);
-    localStorage.setItem(DATA_KEY, JSON.stringify(customerAppData)); // Yadda Saxla!
+    localStorage.setItem(DATA_KEY, JSON.stringify(customerAppData)); 
 
     alert(`✅ Sifarişiniz uğurla yerləşdirildi! Sifariş ID: ${newOrderId}\nQiymət: ${price.toFixed(2)} AZN`);
 
-    // Sifariş verildikdən sonra Admin Panelində görünəcək.
-    document.getElementById('orderForm').reset();
-    updateCakeDetails();
+    // Formu sıfırla
+    document.getElementById('orderForm').reset(); // customer.html-də form ID-si `orderForm` olmalıdır
+    populateCakeSelection();
 }
 
 // Başlanğıc
-document.addEventListener('DOMContentLoaded', populateCakeSelection);
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomerData();
+    populateCakeSelection();
+});
