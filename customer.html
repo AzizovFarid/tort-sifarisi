@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Müştəri Sifarişi - Tort Sifarişi</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -13,200 +13,168 @@
             <h1><i class="fas fa-shopping-cart"></i> Tort Sifarişi</h1>
             <p>Müştəri Sifariş Pəncərəsi</p>
             <div style="margin-top: 15px;">
-                <a href="index.html" class="btn" style="background: #7f8c8d;">Ana Səhifə</a>
-                <a href="admin.html" class="btn btn-primary">Admin Paneli</a>
+                <a href="index.html" class="btn" id="home-btn" style="background: #7f8c8d;">Ana Səhifə</a>
+                <a href="admin.html" class="btn btn-primary" id="admin-btn">Admin Paneli</a>
             </div>
         </header>
         
         <div class="tab-container">
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('order')">
+                <button class="tab active" data-tab-target="order">
                     <i class="fas fa-cookie-bite"></i> Sifariş Ver
                 </button>
-                <button class="tab" onclick="switchTab('tracking')">
+                <button class="tab" data-tab-target="tracking">
                     <i class="fas fa-search"></i> Sifarişi İzlə
                 </button>
             </div>
             
-            <!-- Sifariş Ver -->
             <div id="order" class="tab-content active">
                 <h2><i class="fas fa-cookie-bite"></i> Yeni Tort Sifarişi</h2>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Tort növünü seçin və məlumatlarınızı daxil edin
-                </div>
-                
-                <!-- Axtarış -->
-                <div class="form-group">
-                    <label for="searchCake">Tort Axtarışı:</label>
-                    <input type="text" id="searchCake" class="form-control" 
-                           placeholder="Tort adına görə axtar..." 
-                           onkeyup="filterCakes()">
-                </div>
-                
-                <!-- Tort Seçimi -->
-                <div class="form-group">
-                    <label for="cakeSelect">Tortu Seçin:</label>
-                    <select id="cakeSelect" class="form-control" onchange="loadCakeDetails()">
-                        <option value="">Seçin...</option>
-                    </select>
-                </div>
-                
-                <!-- Çəki və Nəfər -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label for="weight">Çəki (kg):</label>
-                        <input type="number" id="weight" class="form-control" 
-                               min="0.1" max="50" step="0.1" value="1.0"
-                               onchange="calculatePrice()">
-                        <small>1 nəfər ≈ 0.2 kg</small>
+                <form id="orderForm">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Tort növünü seçin və məlumatlarınızı daxil edin
                     </div>
                     
                     <div class="form-group">
-                        <label for="personCount">Nəfər Sayı:</label>
-                        <input type="number" id="personCount" class="form-control" 
-                               min="1" max="250" value="5"
-                               onchange="updateWeightFromPersons()">
+                        <label for="searchCake">Tort Axtarışı:</label>
+                        <input type="text" id="searchCake" class="form-control" 
+                               placeholder="Tort adına görə axtar...">
                     </div>
-                </div>
-                
-                <!-- Şəkil -->
-                <div class="form-group">
-                    <label>Tort Nümunəsi:</label>
-                    <div id="cakeImageContainer" style="
-                        width: 100%;
-                        height: 250px;
-                        background: #f8f9fa;
-                        border: 2px dashed #ddd;
-                        border-radius: 8px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-bottom: 20px;
-                    ">
-                        <div id="cakeImagePlaceholder" style="text-align: center; color: #888;">
-                            <i class="fas fa-birthday-cake" style="font-size: 48px; margin-bottom: 10px;"></i>
-                            <p>Tort seçildikdən sonra şəkil burada görünəcək</p>
-                        </div>
-                        <img id="cakeImage" src="" alt="" style="
-                            max-width: 100%;
-                            max-height: 100%;
-                            display: none;
-                        ">
+                    
+                    <div class="form-group">
+                        <label for="cakeSelect">Tortu Seçin:</label>
+                        <select id="cakeSelect" name="cakeName" class="form-control" required>
+                            <option value="">Seçin...</option>
+                        </select>
                     </div>
-                </div>
-                
-                <!-- Yazı/Açıqlama -->
-                <div class="form-group">
-                    <label for="orderDescription">Sifariş Açıqlaması:</label>
-                    <textarea id="orderDescription" class="form-control" 
-                              rows="3" placeholder="Tortunuz üçün xüsusi yazı və ya açıqlama..."></textarea>
-                </div>
-                
-                <!-- Yazı Stili -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold;">Yazı Stili:</label>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <!-- Rəng seçimi -->
-                        <div>
-                            <label>Rəng:</label>
-                            <div style="display: flex; gap: 5px; margin-top: 5px;">
-                                <button type="button" class="color-btn" style="background: #000000;" 
-                                        onclick="setTextColor('#000000')"></button>
-                                <button type="button" class="color-btn" style="background: #FF0000;" 
-                                        onclick="setTextColor('#FF0000')"></button>
-                                <button type="button" class="color-btn" style="background: #0000FF;" 
-                                        onclick="setTextColor('#0000FF')"></button>
-                                <button type="button" class="color-btn" style="background: #008000;" 
-                                        onclick="setTextColor('#008000')"></button>
-                                <button type="button" class="color-btn" style="background: #FFFF00;" 
-                                        onclick="setTextColor('#FFFF00')"></button>
-                            </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label for="weight">Çəki (kg):</label>
+                            <input type="number" id="weight" name="weight" class="form-control" 
+                                   min="0.1" max="50" step="0.1" value="1.0" required>
+                            <small>1 nəfər ≈ 0.2 kg</small>
                         </div>
                         
-                        <!-- Yazı ölçüsü -->
-                        <div>
-                            <label>Ölçü:</label>
-                            <select id="fontSize" class="form-control" style="width: auto;">
-                                <option value="14">14px</option>
-                                <option value="16">16px</option>
-                                <option value="18">18px</option>
-                                <option value="20">20px</option>
-                                <option value="22">22px</option>
-                                <option value="24">24px</option>
-                            </select>
+                        <div class="form-group">
+                            <label for="personCount">Nəfər Sayı:</label>
+                            <input type="number" id="personCount" class="form-control" 
+                                   min="1" max="250" value="5" readonly> </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tort Nümunəsi:</label>
+                        <div id="cakeImageContainer" style="
+                            width: 100%; height: 250px; background: #f8f9fa; border: 2px dashed #ddd; 
+                            border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+                            margin-bottom: 20px;">
+                            <div id="cakeImagePlaceholder" style="text-align: center; color: #888;">
+                                <i class="fas fa-birthday-cake" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                <p>Tort seçildikdən sonra şəkil burada görünəcək</p>
+                            </div>
+                            <img id="cakeImage" src="" alt="Seçilmiş tort şəkli" style="
+                                max-width: 100%; max-height: 100%; display: none;">
                         </div>
                     </div>
-                </div>
-                
-                <!-- Qiymət -->
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3 style="margin: 0; color: #2c3e50;">Yekun Qiymət:</h3>
-                            <p id="prepTime" style="margin: 5px 0 0 0; color: #7f8c8d;">Hazırlıq vaxtı: -</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <div id="finalPrice" style="
-                                font-size: 28px;
-                                font-weight: bold;
-                                color: #27ae60;
-                            ">0.00 AZN</div>
-                            <div id="priceWarning" style="color: #e74c3c; font-size: 12px; margin-top: 5px; display: none;">
-                                ⚠️ Anbarda çatışmazlıq var
+                    
+                    <div class="form-group">
+                        <label for="orderDescription">Sifariş Açıqlaması:</label>
+                        <textarea id="orderDescription" name="description" class="form-control" 
+                                  rows="3" placeholder="Tortunuz üçün xüsusi yazı və ya açıqlama..."></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold;">Yazı Stili:</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div>
+                                <label>Rəng:</label>
+                                <div id="colorButtons" style="display: flex; gap: 5px; margin-top: 5px;">
+                                    <button type="button" class="color-btn" data-color="#000000" style="background: #000000;"></button>
+                                    <button type="button" class="color-btn" data-color="#FF0000" style="background: #FF0000;"></button>
+                                    <button type="button" class="color-btn" data-color="#0000FF" style="background: #0000FF;"></button>
+                                    <button type="button" class="color-btn" data-color="#008000" style="background: #008000;"></button>
+                                    <button type="button" class="color-btn" data-color="#FFFF00" style="background: #FFFF00;"></button>
+                                    <input type="hidden" id="textColor" name="textColor" value="#000000">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="fontSize">Ölçü:</label>
+                                <select id="fontSize" name="fontSize" class="form-control" style="width: auto;">
+                                    <option value="14">14px</option>
+                                    <option value="16">16px</option>
+                                    <option value="18">18px</option>
+                                    <option value="20">20px</option>
+                                    <option value="22">22px</option>
+                                    <option value="24">24px</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Müştəri Məlumatları -->
-                <h3><i class="fas fa-user"></i> Müştəri Məlumatları</h3>
-                
-                <div class="form-group">
-                    <label for="customerName">Adınız:</label>
-                    <input type="text" id="customerName" class="form-control" 
-                           placeholder="Ad və soyadınızı daxil edin" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="customerPhone">Telefon:</label>
-                    <input type="tel" id="customerPhone" class="form-control" 
-                           placeholder="+994501234567" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="deliveryDate">Çatdırılma Tarixi:</label>
-                    <input type="date" id="deliveryDate" class="form-control" 
-                           min="" required>
-                </div>
-                
-                <!-- Sifariş Ver düyməsi -->
-                <button class="btn btn-success" onclick="placeOrder()" style="width: 100%; padding: 15px; font-size: 1.2em;">
-                    <i class="fas fa-check-circle"></i> Sifarişi Təsdiqlə
-                </button>
-                
-                <div id="orderResult" style="margin-top: 20px;"></div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0; color: #2c3e50;">Yekun Qiymət:</h3>
+                                <p id="prepTime" style="margin: 5px 0 0 0; color: #7f8c8d;">Hazırlıq vaxtı: -</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div id="finalPrice" style="
+                                    font-size: 28px; font-weight: bold; color: #27ae60;
+                                ">0.00 AZN</div>
+                                <div id="priceWarning" style="color: #e74c3c; font-size: 12px; margin-top: 5px; display: none;">
+                                    ⚠️ Anbarda çatışmazlıq var
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-user"></i> Müştəri Məlumatları</h3>
+                    
+                    <div class="form-group">
+                        <label for="customerName">Adınız:</label>
+                        <input type="text" id="customerName" name="customerName" class="form-control" 
+                               placeholder="Ad və soyadınızı daxil edin" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerPhone">Telefon:</label>
+                        <input type="tel" id="customerPhone" name="customerPhone" class="form-control" 
+                               placeholder="+994501234567" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deliveryDate">Çatdırılma Tarixi:</label>
+                        <input type="date" id="deliveryDate" name="deliveryDate" class="form-control" 
+                               min="" required> </div>
+                    
+                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 1.2em;">
+                        <i class="fas fa-check-circle"></i> Sifarişi Təsdiqlə
+                    </button>
+                    
+                    <div id="orderResult" style="margin-top: 20px;"></div>
+                </form>
             </div>
             
-            <!-- Sifariş İzlə -->
             <div id="tracking" class="tab-content">
                 <h2><i class="fas fa-search"></i> Sifariş İzləmə</h2>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Sifariş ID-nizi daxil edərək statusunu yoxlayın
-                </div>
-                
-                <div class="form-group">
-                    <label for="trackOrderId">Sifariş ID:</label>
-                    <input type="text" id="trackOrderId" class="form-control" 
-                           placeholder="Sifariş ID-nizi daxil edin">
-                </div>
-                
-                <button class="btn btn-primary" onclick="trackOrder()">
-                    <i class="fas fa-search"></i> Sifarişi İzlə
-                </button>
-                
-                <div id="trackingResult" style="margin-top: 20px;"></div>
+                <form id="trackingForm">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Sifariş ID-nizi daxil edərək statusunu yoxlayın
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trackOrderId">Sifariş ID:</label>
+                        <input type="text" id="trackOrderId" name="trackOrderId" class="form-control" 
+                               placeholder="Sifariş ID-nizi daxil edin" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Sifarişi İzlə
+                    </button>
+                    
+                    <div id="trackingResult" style="margin-top: 20px;"></div>
+                </form>
             </div>
         </div>
         
